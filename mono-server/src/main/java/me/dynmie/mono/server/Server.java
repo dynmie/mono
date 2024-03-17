@@ -29,7 +29,7 @@ import java.util.logging.SimpleFormatter;
 public class Server {
 
     private final @Getter Logger logger = Logger.getLogger("Server");
-    private final @Getter File workingFolder = new File("mono", "server");
+    private final @Getter File workingFolder = new File("mono-data", "server");
     private final @Getter Terminal terminal;
     private final @Getter LineReader lineReader;
 

@@ -26,7 +26,7 @@ import java.util.logging.SimpleFormatter;
 public class QClient {
 
     private final @Getter Logger logger = Logger.getLogger("Client");
-    private final @Getter File workingFolder = new File("mono", "client");
+    private final @Getter File workingFolder = new File("mono-data", "client");
     private final @Getter Terminal terminal;
 
     private NetworkHandler networkHandler;
