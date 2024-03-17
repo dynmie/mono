@@ -1,0 +1,28 @@
+package me.dynmie.mono.server.network.netty;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
+import me.dynmie.mono.shared.utils.SerializationUtils;
+
+import java.io.Serializable;
+
+/**
+ * @author dynmie
+ */
+public class SerializableEncoder extends ChannelOutboundHandlerAdapter {
+    @Override
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        if (!(msg instanceof Serializable serializable)) {
+            super.write(ctx, msg, promise);
+            return;
+        }
+        ByteBuf byteBuf = ctx.alloc().buffer();
+
+        byte[] bytes = SerializationUtils.serialize(serializable);
+        byteBuf.writeBytes(bytes);
+
+        ctx.write(byteBuf);
+    }
+}
