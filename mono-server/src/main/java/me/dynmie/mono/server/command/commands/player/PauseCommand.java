@@ -1,7 +1,5 @@
-package me.dynmie.mono.server.command.commands;
+package me.dynmie.mono.server.command.commands.player;
 
-import me.dynmie.jeorge.Inject;
-import me.dynmie.mono.server.client.ClientHandler;
 import me.dynmie.mono.server.client.RemoteClient;
 import me.dynmie.mono.server.command.handler.BaseCommand;
 import me.dynmie.mono.server.command.handler.CommandContext;
@@ -12,16 +10,15 @@ import java.util.List;
 /**
  * @author dynmie
  */
-public class PlayCommand extends BaseCommand {
-    @Inject
-    private ClientHandler clientHandler;
+public class PauseCommand extends BaseCommand {
+    public PauseCommand() {
+        super(List.of("pause"));
 
-    public PlayCommand() {
-        super(List.of("play"));
+        setDescription("Get the player to pause");
+        setUsage("<client>");
 
         setMinArgs(1);
         setMaxArgs(1);
-        setDescription("Get the player to play");
 
         addResolver(0, RemoteClient.class);
     }
@@ -29,7 +26,7 @@ public class PlayCommand extends BaseCommand {
     @Override
     public CommandResult onExecute(CommandContext context) {
         RemoteClient client = context.getAt(0, RemoteClient.class);
-        client.play();
+        client.pause();
         return CommandResult.OK;
     }
 }

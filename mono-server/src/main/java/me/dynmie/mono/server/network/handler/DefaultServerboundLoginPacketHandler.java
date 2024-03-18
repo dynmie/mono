@@ -50,14 +50,18 @@ public class DefaultServerboundLoginPacketHandler implements ServerboundLoginPac
         SessionHandler sessionHandler = injector.getDependency(SessionHandler.class);
         ClientHandler clientHandler = injector.getDependency(ClientHandler.class);
 
-        // TODO
         String clientName = "default";
         UUID uniqueId = UUID.randomUUID();
 
         if (clientHandler.getClient(clientName) != null) {
-            clientName = uniqueId.toString();
+            String string = uniqueId.toString();
+            clientName = string.substring(string.length() - 4);
+
+            // name collisions lmao
+            if (clientHandler.getClient(clientName) != null) {
+                clientName = string;
+            }
         }
-        // END TD
 
         ClientSession session = new ClientSession(clientName, uniqueId);
         sessionHandler.addSession(connection.getChannel(), session);
