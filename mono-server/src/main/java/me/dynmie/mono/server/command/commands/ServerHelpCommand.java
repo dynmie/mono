@@ -5,6 +5,7 @@ import me.dynmie.mono.server.command.handler.CommandContext;
 import me.dynmie.mono.server.command.handler.CommandResult;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * @author dynmie
@@ -18,14 +19,16 @@ public class ServerHelpCommand extends BaseCommand {
 
     @Override
     public CommandResult onExecute(CommandContext context) {
-        context.sendMessage("Commands");
+        StringJoiner joiner = new StringJoiner("\n");
+        joiner.add("Commands");
         for (BaseCommand command : context.getHandler().getCommands().values()) {
-            context.sendMessage("/%s%s - %s".formatted(
+            joiner.add("/%s%s - %s".formatted(
                     command.getName(),
                     command.getUsage().isEmpty() ? "" : " " + command.getUsage(),
                     command.getDescription()
             ));
         }
+        context.sendMessage(joiner.toString());
         return CommandResult.OK;
     }
 }

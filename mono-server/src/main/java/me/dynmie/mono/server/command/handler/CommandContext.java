@@ -24,6 +24,13 @@ public class CommandContext {
     }
 
     public void sendMessage(String message) {
+        if (message.contains("\n")) {
+            String[] split = message.split("\n");
+            for (String s : split) {
+                handler.getLogger().info(s);
+            }
+            return;
+        }
         handler.getLogger().info(message);
     }
 
