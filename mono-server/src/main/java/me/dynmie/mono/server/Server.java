@@ -5,6 +5,10 @@ import me.dynmie.jeorge.Injector;
 import me.dynmie.jeorge.Jeorge;
 import me.dynmie.mono.server.client.ClientHandler;
 import me.dynmie.mono.server.client.session.SessionHandler;
+import me.dynmie.mono.server.command.handler.CommandHandler;
+import me.dynmie.mono.server.command.server.CommandRegistrationHandler;
+import me.dynmie.mono.server.command.server.ServerCommandHandlerConfiguration;
+import me.dynmie.mono.server.console.ServerConsoleHandler;
 import me.dynmie.mono.server.data.ServerConfig;
 import me.dynmie.mono.server.data.ServerConfigHandler;
 import me.dynmie.mono.server.jeorge.ServerBinder;
@@ -74,11 +78,20 @@ public class Server {
 
         networkHandler = new NetworkHandler(logger, config.getNetworkInformation(), connectionHandler, sessionHandler, clientHandler);
 
-        injector = Jeorge.createInjector(new ServerBinder(this, logger, sessionHandler, connectionHandler, clientHandler, networkHandler, config));
+
+        CommandHandler commandHandler = new CommandHandler(new ServerCommandHandlerConfiguration(), logger);
+
+        injector = Jeorge.createInjector(new ServerBinder(this, logger, sessionHandler, connectionHandler, clientHandler, networkHandler, commandHandler, config));
+
+        CommandRegistrationHandler commandRegistrationHandler = new CommandRegistrationHandler(injector, commandHandler);
+        commandRegistrationHandler.initialize();
+
+        ServerConsoleHandler serverConsoleHandler = new ServerConsoleHandler(this, logger, lineReader, commandHandler);
 
         networkHandler.start();
 
         logger.info("Welcome to the server!");
+        serverConsoleHandler.initialize();
     }
 
     public void shutdown() {
