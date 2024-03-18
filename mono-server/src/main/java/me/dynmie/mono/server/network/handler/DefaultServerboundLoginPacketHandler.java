@@ -54,6 +54,11 @@ public class DefaultServerboundLoginPacketHandler implements ServerboundLoginPac
         String clientName = "default";
         UUID uniqueId = UUID.randomUUID();
 
+        if (clientHandler.getClient(clientName) != null) {
+            clientName = uniqueId.toString();
+        }
+        // END TD
+
         ClientSession session = new ClientSession(clientName, uniqueId);
         sessionHandler.addSession(connection.getChannel(), session);
 

@@ -1,6 +1,6 @@
-package me.dynmie.mono.shared.packet.store.ready;
+package me.dynmie.mono.shared.packet.ready;
 
-import me.dynmie.mono.shared.packet.store.PacketStore;
+import me.dynmie.mono.shared.packet.PacketStore;
 
 /**
  * @author dynmie

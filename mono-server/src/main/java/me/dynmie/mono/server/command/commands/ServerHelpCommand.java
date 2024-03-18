@@ -14,7 +14,7 @@ public class ServerHelpCommand extends BaseCommand {
     public ServerHelpCommand() {
         super(List.of("help", "?"));
 
-        setDescription("Show a list of all commands.");
+        setDescription("Show a list of all commands");
     }
 
     @Override
@@ -22,7 +22,7 @@ public class ServerHelpCommand extends BaseCommand {
         StringJoiner joiner = new StringJoiner("\n");
         joiner.add("Commands");
         for (BaseCommand command : context.getHandler().getCommands().values()) {
-            joiner.add("/%s%s - %s".formatted(
+            joiner.add("%s%s - %s".formatted(
                     command.getName(),
                     command.getUsage().isEmpty() ? "" : " " + command.getUsage(),
                     command.getDescription()

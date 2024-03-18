@@ -1,10 +1,10 @@
 package me.dynmie.mono.server.command.handler;
 
 import lombok.Getter;
+import me.dynmie.mono.server.command.handler.resolver.ArgumentResolver;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * @author dynmie
@@ -12,10 +12,10 @@ import java.util.function.Function;
 @Getter
 public class CommandHandlerConfiguration {
 
-    private final Map<Class<?>, Function<String, ?>> resolvers = new HashMap<>();
+    private final Map<Class<?>, ArgumentResolver<?>> resolvers = new HashMap<>();
 
-    public <T> void addResolver(Class<T> clazz, Function<String, T> resolver) {
-        resolvers.put(clazz, resolver);
+    public <T> void addResolver(Class<T> clazz, ArgumentResolver<T> type) {
+        resolvers.put(clazz, type);
     }
 
 }

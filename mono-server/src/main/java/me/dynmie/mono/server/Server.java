@@ -79,7 +79,10 @@ public class Server {
         networkHandler = new NetworkHandler(logger, config.getNetworkInformation(), connectionHandler, sessionHandler, clientHandler);
 
 
-        CommandHandler commandHandler = new CommandHandler(new ServerCommandHandlerConfiguration(), logger);
+        ServerCommandHandlerConfiguration commandHandlerConfig = new ServerCommandHandlerConfiguration(
+                clientHandler
+        );
+        CommandHandler commandHandler = new CommandHandler(commandHandlerConfig, logger);
 
         injector = Jeorge.createInjector(new ServerBinder(this, logger, sessionHandler, connectionHandler, clientHandler, networkHandler, commandHandler, config));
 

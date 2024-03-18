@@ -1,6 +1,8 @@
 package me.dynmie.mono.server.command.handler;
 
 import lombok.Getter;
+import me.dynmie.mono.server.command.handler.resolver.ArgumentResolver;
+
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -94,19 +96,13 @@ public class CommandContext {
             return null;
         }
 
-        var function = handler.getConfiguration().getResolvers().get(clazz);
-        if (function == null) {
+        @SuppressWarnings("unchecked") // checked
+        ArgumentResolver<T> resolver = (ArgumentResolver<T>) handler.getConfiguration().getResolvers().get(clazz);
+        if (resolver == null) {
             return null;
         }
 
-        T ret;
-        try {
-            ret = clazz.cast(function.apply(getArgAt(pos)));
-        } catch (ClassCastException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ret;
+        return resolver.resolve(this, getArgAt(pos));
     }
 
     public <T> boolean isAt(int pos, Class<T> clazz) {

@@ -2,6 +2,8 @@ package me.dynmie.mono.server.command.server;
 
 import lombok.AllArgsConstructor;
 import me.dynmie.jeorge.Injector;
+import me.dynmie.mono.server.command.commands.PauseCommand;
+import me.dynmie.mono.server.command.commands.PlayCommand;
 import me.dynmie.mono.server.command.commands.ServerHelpCommand;
 import me.dynmie.mono.server.command.handler.BaseCommand;
 import me.dynmie.mono.server.command.handler.CommandHandler;
@@ -14,7 +16,9 @@ import java.util.List;
 @AllArgsConstructor
 public class CommandRegistrationHandler {
     private static final List<Class<? extends BaseCommand>> commandTypes = List.of(
-            ServerHelpCommand.class
+            ServerHelpCommand.class,
+            PauseCommand.class,
+            PlayCommand.class
     );
 
     private final Injector injector;

@@ -1,6 +1,7 @@
 package me.dynmie.mono.server.network.connection;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.util.AttributeKey;
 import lombok.Getter;
 import lombok.Setter;
@@ -60,10 +61,10 @@ public class ClientConnection {
         }
     }
 
-    public void sendPacket(Packet<? extends PacketHandler> packet) {
+    public ChannelFuture sendPacket(Packet<? extends PacketHandler> packet) {
         try {
             channelLock.lock();
-            channel.writeAndFlush(Packets.toRaw(getConnectionState(), PacketDirection.CLIENTBOUND, packet));
+            return channel.writeAndFlush(Packets.toRaw(getConnectionState(), PacketDirection.CLIENTBOUND, packet));
         } finally {
             if (channelLock.isLocked()) {
                 channelLock.unlock();

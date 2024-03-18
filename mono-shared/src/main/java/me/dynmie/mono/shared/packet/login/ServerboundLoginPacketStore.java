@@ -1,7 +1,7 @@
-package me.dynmie.mono.shared.packet.store.login;
+package me.dynmie.mono.shared.packet.login;
 
+import me.dynmie.mono.shared.packet.PacketStore;
 import me.dynmie.mono.shared.packet.login.server.ServerboundLoginPacket;
-import me.dynmie.mono.shared.packet.store.PacketStore;
 
 /**
  * @author dynmie

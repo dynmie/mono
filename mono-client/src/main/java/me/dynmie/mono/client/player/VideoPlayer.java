@@ -53,7 +53,9 @@ public class VideoPlayer {
 
     public void play() {
         paused = false;
-        notifyAll();
+        synchronized (this) {
+            notifyAll();
+        }
     }
 
     public void pause() {
@@ -62,6 +64,9 @@ public class VideoPlayer {
 
     public void stop() {
         running = false;
+        synchronized (this) {
+            notifyAll();
+        }
     }
 
     private void createThread() {
@@ -115,6 +120,7 @@ public class VideoPlayer {
                         while (paused) {
                             try {
                                 wait();
+                                if (!running) return;
                             } catch (InterruptedException e) {
                                 Thread.currentThread().interrupt();
                                 return;

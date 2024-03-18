@@ -45,9 +45,7 @@ public class ServerConsoleHandler {
                 try {
                     commandHandler.handleCommand(label, Collections.unmodifiableList(args));
                 } catch (Exception e) {
-                    for (StackTraceElement element : e.getStackTrace()) {
-                        logger.severe(element.toString());
-                    }
+                    e.printStackTrace();
                 }
             }
         } catch (UserInterruptException | EndOfFileException e) {

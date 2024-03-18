@@ -17,9 +17,28 @@ public class PlayerHandler {
         this.terminal = terminal;
     }
 
+    public void initialize() {
+        Terminal.SignalHandler signalHandler = signal -> {
+            if (signal == Terminal.Signal.WINCH) {
+                VideoPlayer plr = getPlayer();
+                if (plr == null) return;
+                plr.setResolution(terminal.getWidth(), terminal.getHeight());
+            }
+        };
+
+        terminal.handle(Terminal.Signal.WINCH, signalHandler);
+    }
+
     public void readyFor(File file) {
         stop();
         player = new VideoPlayer(terminal.output(), file, terminal.getWidth(), terminal.getHeight(), true);
+        player.start();
+    }
+
+    public void play() {
+        if (player != null) {
+            player.play();
+        }
     }
 
     public void stop() {

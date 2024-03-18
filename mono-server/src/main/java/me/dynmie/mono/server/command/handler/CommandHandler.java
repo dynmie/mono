@@ -2,7 +2,9 @@ package me.dynmie.mono.server.command.handler;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import me.dynmie.mono.server.command.handler.condition.CommandCondition;
+import me.dynmie.mono.server.command.handler.resolver.ArgumentResolver;
+import me.dynmie.mono.server.command.handler.resolver.ResolverNotFoundException;
+import me.dynmie.mono.server.command.handler.resolver.UnresolvedException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,18 +95,31 @@ public class CommandHandler {
         }
 
         // CONDITION
-        if (current.getConditions() != null) {
+        if (!current.getResolvers().isEmpty()) {
             for (int i = 0; i < argsToReturn.size(); i++) {
-                if (current.getConditions().isEmpty()) continue;
-                if (i >= current.getConditions().size()) continue;
+                if (i >= current.getResolvers().size()) continue;
 
-                CommandCondition condition = current.getConditions().get(i);
-                if (condition == null) continue;
+                String arg = argsToReturn.get(i);
 
-                CommandResult status = condition.check(argsToReturn.get(i));
-                runStat(status, usage);
+                Class<?> resolverClass = current.getResolvers().get(i);
+                if (resolverClass == null) {
+                    throw new ResolverNotFoundException("Resolving type for index '" + i + "' in '" + current + "' was not found.");
+                }
 
-                if (!status.isSuccess()) return;
+                ArgumentResolver<?> resolver = getConfiguration().getResolvers().get(resolverClass);
+                if (resolver == null) {
+                    throw new ResolverNotFoundException("Resolver for class '" + resolverClass.getName() + "' was not found.");
+                }
+
+                CommandResult result = CommandResult.OK;
+                try {
+                    resolver.resolve(context, arg);
+                } catch (UnresolvedException e) {
+                    result = resolver.failed(context);
+                    runStat(result, usage);
+                }
+
+                if (!result.isSuccess()) return;
             }
         }
 

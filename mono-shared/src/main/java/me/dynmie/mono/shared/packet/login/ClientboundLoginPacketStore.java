@@ -1,8 +1,8 @@
-package me.dynmie.mono.shared.packet.store.login;
+package me.dynmie.mono.shared.packet.login;
 
+import me.dynmie.mono.shared.packet.PacketStore;
 import me.dynmie.mono.shared.packet.login.client.ClientboundLoginFailedPacket;
 import me.dynmie.mono.shared.packet.login.client.ClientboundLoginResponsePacket;
-import me.dynmie.mono.shared.packet.store.PacketStore;
 
 /**
  * @author dynmie

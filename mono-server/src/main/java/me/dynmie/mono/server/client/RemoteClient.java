@@ -2,9 +2,11 @@ package me.dynmie.mono.server.client;
 
 import lombok.Getter;
 import me.dynmie.mono.server.network.connection.ClientConnection;
+import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPausePacket;
+import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPlayPacket;
 import me.dynmie.mono.shared.session.ClientSession;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 /**
@@ -19,12 +21,24 @@ public class RemoteClient {
         this.connection = connection;
     }
 
-    public SocketAddress getAddress() {
-        return connection.getChannel().remoteAddress();
+    public void play() {
+        connection.sendPacket(new ClientboundPlayerPlayPacket());
+    }
+
+    public void pause() {
+        connection.sendPacket(new ClientboundPlayerPausePacket());
+    }
+
+    public InetSocketAddress getAddress() {
+        return (InetSocketAddress) connection.getChannel().remoteAddress();
     }
 
     public boolean isConnected() {
         return connection.isConnected();
+    }
+
+    public String getName() {
+        return session.getName();
     }
 
     public UUID getUniqueId() {

@@ -14,6 +14,12 @@ public class ClientHandler {
         return clients.get(uniqueId);
     }
 
+    public RemoteClient getClient(String name) {
+        return clients.values().stream()
+                .filter(c -> c.getName().equalsIgnoreCase(name))
+                .findFirst().orElse(null);
+    }
+
     public void addClient(RemoteClient client) {
         clients.put(client.getUniqueId(), client);
     }

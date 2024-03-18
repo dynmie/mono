@@ -68,6 +68,7 @@ public class QClient {
         networkHandler = new NetworkHandler(this, logger, config.getNetworkInformation());
 
         PlayerHandler playerHandler = new PlayerHandler(terminal);
+        playerHandler.initialize();
 
         injector = Jeorge.createInjector(new ClientBinder(
                 this,
