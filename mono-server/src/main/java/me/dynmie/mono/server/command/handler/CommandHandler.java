@@ -97,13 +97,12 @@ public class CommandHandler {
         // CONDITION
         if (!current.getResolvers().isEmpty()) {
             for (int i = 0; i < argsToReturn.size(); i++) {
-                if (i >= current.getResolvers().size()) continue;
-
                 String arg = argsToReturn.get(i);
 
+                logger.info("index: " + i);
                 Class<?> resolverClass = current.getResolvers().get(i);
                 if (resolverClass == null) {
-                    throw new ResolverNotFoundException("Resolving type for index '" + i + "' in '" + current + "' was not found.");
+                    continue;
                 }
 
                 ArgumentResolver<?> resolver = getConfiguration().getResolvers().get(resolverClass);

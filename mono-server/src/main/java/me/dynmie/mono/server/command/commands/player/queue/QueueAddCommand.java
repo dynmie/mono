@@ -24,16 +24,22 @@ public class QueueAddCommand extends BaseCommand {
         setUsage("<client> <id>");
 
         setMinArgs(2);
-        setMaxArgs(2);
+        setMaxArgs(3);
 
         addResolver(0, RemoteClient.class);
+        addResolver(2, Boolean.class);
     }
 
     @Override
     public CommandResult onExecute(CommandContext context) {
         RemoteClient client = context.getAt(0, RemoteClient.class);
 
-        PlayerVideoInfo videoInfo = videoHandler.getVideoInfo(context.getArgAt(1));
+        boolean def = false;
+        if (context.size() > 2) {
+            def = context.getAt(2, Boolean.class);
+        }
+
+        PlayerVideoInfo videoInfo = videoHandler.getVideoInfo(context.getArgAt(1), def);
         if (videoInfo == null) {
             context.sendMessage("That video doesn't exist. Are you using the id instead of the link?");
             return CommandResult.OK;

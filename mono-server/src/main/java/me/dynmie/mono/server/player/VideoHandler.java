@@ -49,7 +49,7 @@ public class VideoHandler {
         logger.info("Playlist loaded.");
     }
 
-    public PlayerVideoInfo getVideoInfo(String id) {
+    public PlayerVideoInfo getVideoInfo(String id, boolean def) {
         RequestVideoInfo request = new RequestVideoInfo(id);
         Response<VideoInfo> response = downloader.getVideoInfo(request);
         VideoInfo video = response.data();
@@ -57,9 +57,13 @@ public class VideoHandler {
 
         VideoDetails details = video.details();
         return new PlayerVideoInfo(
-                false,
+                def,
                 details.title(),
                 details.videoId()
         );
+    }
+
+    public PlayerVideoInfo getVideoInfo(String id) {
+        return this.getVideoInfo(id, false);
     }
 }

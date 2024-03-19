@@ -10,6 +10,7 @@ import me.dynmie.mono.shared.player.PlayerVideoInfo;
 
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.stream.Stream;
 
 /**
  * @author dynmie
@@ -19,12 +20,16 @@ public class QueueCommand extends BaseCommand {
     public QueueCommand(Injector injector) {
         super(List.of("queue"));
 
-        setUsage("<add|client>");
+        setUsage("<add|client|remove>");
         setMaxArgs(1);
         setMinArgs(1);
         setDescription("Edit a client's queue");
 
-        addSubcommand(injector.createInstance(QueueAddCommand.class));
+        Stream.of(
+                QueueRemoveCommand.class,
+                QueueAddCommand.class
+        ).map(injector::createInstance).forEach(this::addSubcommand);
+
         addResolver(0, RemoteClient.class);
     }
 
