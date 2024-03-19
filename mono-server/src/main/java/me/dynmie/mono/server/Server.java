@@ -106,7 +106,7 @@ public class Server {
 
         networkHandler.start();
 
-        logger.info("Welcome to the server!");
+        logger.info("Welcome to Mono!");
         serverConsoleHandler.initialize();
     }
 
