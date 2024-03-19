@@ -10,4 +10,8 @@ public class PlayerVideoInfo {
     private final boolean isDefaultPlaylistVideo;
     private final String title;
     private final String videoId;
+
+    public String getDisplayName() {
+        return title + " (" + videoId + ")";
+    }
 }

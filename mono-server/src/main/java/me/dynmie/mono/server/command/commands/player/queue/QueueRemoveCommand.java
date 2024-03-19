@@ -42,9 +42,9 @@ public class QueueRemoveCommand extends BaseCommand {
             return CommandResult.OK;
         }
 
-        client.getQueue().remove(index);
+        PlayerVideoInfo removed = client.getQueue().remove(index);
         client.sendPlaylistInfo();
-        context.sendMessage("Queue has been updated for the client.");
+        context.sendMessage("The video '" + removed.getTitle() + "' (" + removed.getVideoId() + ") has been removed from the queue.");
 
         return CommandResult.OK;
     }

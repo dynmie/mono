@@ -3,6 +3,7 @@ package me.dynmie.mono.server.command.server;
 import lombok.AllArgsConstructor;
 import me.dynmie.jeorge.Injector;
 import me.dynmie.mono.server.command.commands.ServerHelpCommand;
+import me.dynmie.mono.server.command.commands.ShutdownCommand;
 import me.dynmie.mono.server.command.commands.clients.ClientInfoCommand;
 import me.dynmie.mono.server.command.commands.clients.ClientsCommand;
 import me.dynmie.mono.server.command.commands.player.NowPlayingCommand;
@@ -28,7 +29,8 @@ public class CommandRegistrationHandler {
             ClientInfoCommand.class,
             ClientsCommand.class,
             NowPlayingCommand.class,
-            QueueCommand.class
+            QueueCommand.class,
+            ShutdownCommand.class
     );
 
     private final Injector injector;

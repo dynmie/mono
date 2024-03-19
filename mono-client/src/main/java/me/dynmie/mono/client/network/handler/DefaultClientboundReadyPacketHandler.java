@@ -4,6 +4,7 @@ import me.dynmie.jeorge.Inject;
 import me.dynmie.jeorge.Injector;
 import me.dynmie.mono.client.QClient;
 import me.dynmie.mono.client.network.connection.ServerConnection;
+import me.dynmie.mono.client.player.ActualVideoInfo;
 import me.dynmie.mono.client.player.PlayerHandler;
 import me.dynmie.mono.client.player.QueueHandler;
 import me.dynmie.mono.client.player.VideoPlayer;
@@ -12,7 +13,9 @@ import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPausePacket;
 import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPlayPacket;
 import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPlaylistUpdatePacket;
 import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerSkipPacket;
+import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerInfoPacket;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerPlaylistUpdatePacket;
+import me.dynmie.mono.shared.player.PlayerInfo;
 import me.dynmie.mono.shared.player.PlayerPlaylistInfo;
 import me.dynmie.mono.shared.player.PlayerVideoInfo;
 
@@ -26,7 +29,7 @@ import java.util.Optional;
 public class DefaultClientboundReadyPacketHandler implements ClientboundReadyPacketHandler {
 
     private final Injector injector;
-    private final ServerConnection serverConnection;
+    private final ServerConnection connection;
 
     @Inject
     private QClient client;
@@ -37,9 +40,9 @@ public class DefaultClientboundReadyPacketHandler implements ClientboundReadyPac
     @Inject
     private QueueHandler queueHandler;
 
-    public DefaultClientboundReadyPacketHandler(Injector injector, ServerConnection serverConnection) {
+    public DefaultClientboundReadyPacketHandler(Injector injector, ServerConnection connection) {
         this.injector = injector;
-        this.serverConnection = serverConnection;
+        this.connection = connection;
 
         injector.injectMembers(this);
     }
@@ -52,13 +55,25 @@ public class DefaultClientboundReadyPacketHandler implements ClientboundReadyPac
             return;
         }
         player.play();
+        ActualVideoInfo nowPlaying = queueHandler.getNowPlaying();
+        if (nowPlaying == null) return;
+        connection.sendPacket(new ServerboundPlayerInfoPacket(
+                new PlayerInfo(nowPlaying.info(), player.isPaused())
+        ));
     }
 
     @Override
     public void onPlayerPause(ClientboundPlayerPausePacket packet) {
-        if (playerHandler.getPlayer() != null) {
-            playerHandler.getPlayer().pause();
+        VideoPlayer player = playerHandler.getPlayer();
+        if (player == null) {
+            return;
         }
+        player.pause();
+        ActualVideoInfo nowPlaying = queueHandler.getNowPlaying();
+        if (nowPlaying == null) return;
+        connection.sendPacket(new ServerboundPlayerInfoPacket(
+                new PlayerInfo(nowPlaying.info(), player.isPaused())
+        ));
     }
 
     @Override
@@ -99,7 +114,7 @@ public class DefaultClientboundReadyPacketHandler implements ClientboundReadyPac
             });
         }
 
-        serverConnection.sendPacket(new ServerboundPlayerPlaylistUpdatePacket(
+        connection.sendPacket(new ServerboundPlayerPlaylistUpdatePacket(
                 new PlayerPlaylistInfo(queueHandler.getQueue())
         ));
     }

@@ -29,10 +29,14 @@ public class NowPlayingCommand extends BaseCommand {
     public CommandResult onExecute(CommandContext context) {
         RemoteClient client = context.getAt(0, RemoteClient.class);
         PlayerInfo playerInfo = client.getPlayerInfo();
+        if (playerInfo == null) {
+            context.sendMessage("That client isn't playing anything.");
+            return CommandResult.OK;
+        }
 
         StringJoiner joiner = new StringJoiner("\n");
         joiner.add("Now playing (" + client.getName() + ")");
-        joiner.add("Video: " + playerInfo.getNowPlaying().getTitle() + " (" + playerInfo.getNowPlaying().getVideoId() + ")");
+        joiner.add("Video: " + playerInfo.getNowPlaying().getDisplayName());
         joiner.add("State: " + (playerInfo.isPaused() ? "Paused" : "Playing"));
 
         context.sendMessage(joiner.toString());
