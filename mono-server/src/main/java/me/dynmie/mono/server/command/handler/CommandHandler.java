@@ -99,7 +99,6 @@ public class CommandHandler {
             for (int i = 0; i < argsToReturn.size(); i++) {
                 String arg = argsToReturn.get(i);
 
-                logger.info("index: " + i);
                 Class<?> resolverClass = current.getResolvers().get(i);
                 if (resolverClass == null) {
                     continue;
