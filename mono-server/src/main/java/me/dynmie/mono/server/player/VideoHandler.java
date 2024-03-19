@@ -8,8 +8,8 @@ import com.github.kiulian.downloader.model.playlist.PlaylistInfo;
 import com.github.kiulian.downloader.model.playlist.PlaylistVideoDetails;
 import com.github.kiulian.downloader.model.videos.VideoDetails;
 import com.github.kiulian.downloader.model.videos.VideoInfo;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import me.dynmie.mono.server.data.ServerConfig;
 import me.dynmie.mono.shared.player.PlayerPlaylistInfo;
 import me.dynmie.mono.shared.player.PlayerVideoInfo;
@@ -17,6 +17,7 @@ import me.dynmie.mono.shared.player.PlayerVideoInfo;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -28,14 +29,15 @@ public class VideoHandler {
     private final ServerConfig.PlayerConfiguration configuration;
     private final Logger logger;
     private final YoutubeDownloader downloader = new YoutubeDownloader();
-    private @Getter PlayerPlaylistInfo defaultPlaylistInfo;
+    private List<PlayerVideoInfo> infos;
 
+    @SneakyThrows
     public void initialize() {
         String playlistId = configuration.getDefaultPlaylistId();
         logger.info("Loading playlist '" + playlistId + "'...");
         RequestPlaylistInfo request = new RequestPlaylistInfo(playlistId);
         Response<PlaylistInfo> response = downloader.getPlaylistInfo(request);
-        PlaylistInfo playlistInfo = response.data();
+        PlaylistInfo playlistInfo = response.data(30, TimeUnit.SECONDS);
 
         List<PlayerVideoInfo> infos = new ArrayList<>();
         for (PlaylistVideoDetails video : playlistInfo.videos()) {
@@ -43,16 +45,23 @@ public class VideoHandler {
                     new PlayerVideoInfo(true, video.title(), video.videoId())
             );
         }
-        Collections.shuffle(infos);
 
-        defaultPlaylistInfo = new PlayerPlaylistInfo(infos);
+        this.infos = infos;
+
         logger.info("Playlist loaded.");
     }
 
+    public PlayerPlaylistInfo generateDefaultPlaylistInfo() {
+        ArrayList<PlayerVideoInfo> playerVideoInfos = new ArrayList<>(infos);
+        Collections.shuffle(playerVideoInfos);
+        return new PlayerPlaylistInfo(playerVideoInfos);
+    }
+
+    @SneakyThrows
     public PlayerVideoInfo getVideoInfo(String id, boolean def) {
         RequestVideoInfo request = new RequestVideoInfo(id);
         Response<VideoInfo> response = downloader.getVideoInfo(request);
-        VideoInfo video = response.data();
+        VideoInfo video = response.data(30, TimeUnit.SECONDS);
         if (video == null) return null;
 
         VideoDetails details = video.details();

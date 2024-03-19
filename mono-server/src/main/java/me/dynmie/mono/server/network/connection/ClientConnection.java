@@ -62,13 +62,11 @@ public class ClientConnection {
     }
 
     public ChannelFuture sendPacket(Packet<? extends PacketHandler> packet) {
+        channelLock.lock();
         try {
-            channelLock.lock();
             return channel.writeAndFlush(Packets.toRaw(getConnectionState(), PacketDirection.CLIENTBOUND, packet));
         } finally {
-            if (channelLock.isLocked()) {
-                channelLock.unlock();
-            }
+            channelLock.unlock();
         }
     }
 }

@@ -18,6 +18,7 @@ import me.dynmie.mono.shared.session.ClientSession;
 
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -83,24 +84,28 @@ public class DefaultServerboundLoginPacketHandler implements ServerboundLoginPac
         RemoteClient client = new RemoteClient(
                 session,
                 connection,
-                new ArrayList<>(videoHandler.getDefaultPlaylistInfo().getVideos())
+                new ArrayList<>(videoHandler.generateDefaultPlaylistInfo().getVideos())
         );
         clientHandler.addClient(client);
 
-        connection.sendPacket(new ClientboundLoginResponsePacket(session));
+        // wierd fix, apparently netty doesn't run future listeners for some reason
+        // can't seem to find a solution so i did this instead
+        Thread.startVirtualThread(() -> {
+            connection.sendPacket(new ClientboundLoginResponsePacket(session))
+                    .awaitUninterruptibly(2, TimeUnit.MILLISECONDS);
 
-        connection.setPacketHandler(new DefaultServerboundReadyPacketHandler(injector, client, connection));
-        connection.setConnectionState(ConnectionState.READY);
+            connection.setPacketHandler(new DefaultServerboundReadyPacketHandler(injector, client, connection));
+            connection.setConnectionState(ConnectionState.READY);
 
-        connection.sendPacket(new ClientboundPlayerPlaylistUpdatePacket(
-                new PlayerPlaylistInfo(client.getQueue())
-        ));
+            connection.sendPacket(new ClientboundPlayerPlaylistUpdatePacket(
+                    new PlayerPlaylistInfo(client.getQueue())
+            ));
 
-        logger.info("Client %s[%s](%s) has successfully logged in!".formatted(
-                session.getName(),
-                session.getUniqueId(),
-                connection.getChannel().remoteAddress()
-        ));
-
+            logger.info("Client %s[%s](%s) has successfully logged in!".formatted(
+                    session.getName(),
+                    session.getUniqueId(),
+                    connection.getChannel().remoteAddress()
+            ));
+        });
     }
 }

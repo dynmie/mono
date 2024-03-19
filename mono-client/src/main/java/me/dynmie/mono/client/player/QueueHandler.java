@@ -7,6 +7,7 @@ import com.github.kiulian.downloader.model.videos.VideoInfo;
 import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import me.dynmie.mono.client.QClient;
 import me.dynmie.mono.client.network.NetworkHandler;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerPlaylistUpdatePacket;
@@ -16,6 +17,8 @@ import me.dynmie.mono.shared.player.PlayerVideoInfo;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author dynmie
@@ -56,11 +59,16 @@ public class QueueHandler {
             PlayerVideoInfo first = queue.getFirst();
 
             RequestVideoInfo requestVideoInfo = new RequestVideoInfo(first.getVideoId());
-            VideoInfo videoInfo = downloader.getVideoInfo(requestVideoInfo).data();
+            VideoInfo videoInfo;
+            try {
+                videoInfo = downloader.getVideoInfo(requestVideoInfo).data(2, TimeUnit.MINUTES);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(e);
+            }
             VideoFormat videoFormat = videoInfo.bestVideoWithAudioFormat();
 
             String fileName = first.getVideoId();
-            File shouldFile = new File(outputDirectory, fileName + videoFormat.extension().value());
+            File shouldFile = new File(outputDirectory, fileName + "." + videoFormat.extension().value());
 
             if (shouldFile.exists()) {
                 nextVideo = new ActualVideoInfo(shouldFile, first);
