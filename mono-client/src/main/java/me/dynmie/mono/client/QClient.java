@@ -8,6 +8,7 @@ import me.dynmie.mono.client.data.ClientConfigHandler;
 import me.dynmie.mono.client.jeorge.ClientBinder;
 import me.dynmie.mono.client.network.NetworkHandler;
 import me.dynmie.mono.client.player.PlayerHandler;
+import me.dynmie.mono.client.player.QueueHandler;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.InfoCmp;
@@ -67,18 +68,22 @@ public class QClient {
 
         networkHandler = new NetworkHandler(this, logger, config.getNetworkInformation());
 
-        PlayerHandler playerHandler = new PlayerHandler(terminal);
-        playerHandler.initialize();
+        QueueHandler queueHandler = new QueueHandler(this, networkHandler);
+
+        PlayerHandler playerHandler = new PlayerHandler(terminal, queueHandler, networkHandler);
 
         injector = Jeorge.createInjector(new ClientBinder(
                 this,
                 networkHandler,
                 configHandler,
                 playerHandler,
+                queueHandler,
                 config
         ));
 
         networkHandler.start();
+        queueHandler.initialize();
+        playerHandler.initialize();
     }
 
     public void shutdown() {

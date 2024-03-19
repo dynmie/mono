@@ -1,6 +1,9 @@
 package me.dynmie.mono.client.player;
 
 import lombok.Getter;
+import me.dynmie.mono.client.network.NetworkHandler;
+import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerInfoPacket;
+import me.dynmie.mono.shared.player.PlayerInfo;
 import org.jline.terminal.Terminal;
 
 import java.io.File;
@@ -12,9 +15,16 @@ public class PlayerHandler {
 
     private @Getter VideoPlayer player;
     private final Terminal terminal;
+    private final QueueHandler queueHandler;
+    private final NetworkHandler networkHandler;
 
-    public PlayerHandler(Terminal terminal) {
+    private Thread thread;
+    public static final Object LOCK = new Object();
+
+    public PlayerHandler(Terminal terminal, QueueHandler queueHandler, NetworkHandler networkHandler) {
         this.terminal = terminal;
+        this.queueHandler = queueHandler;
+        this.networkHandler = networkHandler;
     }
 
     public void initialize() {
@@ -27,6 +37,38 @@ public class PlayerHandler {
         };
 
         terminal.handle(Terminal.Signal.WINCH, signalHandler);
+
+        thread = Thread.startVirtualThread(() -> {
+            while (!thread.isInterrupted()) {
+                ActualVideoInfo nextVideo = queueHandler.getNextVideo();
+                if (nextVideo == null) {
+                    synchronized (LOCK) {
+                        try {
+                            LOCK.wait();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+                nextVideo = queueHandler.getNextVideo();
+                queueHandler.setNextVideo(null);
+                queueHandler.setNowPlaying(nextVideo);
+                readyFor(nextVideo.file());
+                play();
+
+                networkHandler.getConnection().sendPacket(new ServerboundPlayerInfoPacket(
+                        new PlayerInfo(nextVideo.info(), player.isPaused())
+                ));
+
+                queueHandler.next();
+                queueHandler.update(false);
+                try {
+                    player.awaitFinish();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     public void readyFor(File file) {

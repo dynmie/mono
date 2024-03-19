@@ -125,11 +125,11 @@ public class CommandHandler {
 
 
         // EXECUTION
-        execute(current, context, usage);
+        executeCommand(current, context, usage);
 
     }
 
-    private void execute(BaseCommand command, CommandContext context, String usage) {
+    private void executeCommand(BaseCommand command, CommandContext context, String usage) {
         CommandResult status;
         try {
             status = command.onExecute(context);
@@ -146,4 +146,23 @@ public class CommandHandler {
         }
     }
 
+    public void execute(String line) {
+        String label;
+        List<String> args;
+
+        List<String> split = Arrays.asList(line.split(" "));
+        if (split.size() > 1) {
+            label = split.getFirst();
+            args = split.subList(1, split.size());
+        } else {
+            label = split.getFirst();
+            args = Collections.emptyList();
+        }
+
+        try {
+            handleCommand(label, Collections.unmodifiableList(args));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

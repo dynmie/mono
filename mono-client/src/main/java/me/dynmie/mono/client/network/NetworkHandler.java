@@ -50,6 +50,7 @@ public class NetworkHandler {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel channel) {
+                        channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(2097152));
                         ChannelPipeline pipeline = channel.pipeline();
                         pipeline.addLast(new PacketDecoder(networkHandler));
                         pipeline.addLast(new SerializableEncoder());

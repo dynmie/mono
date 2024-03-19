@@ -7,18 +7,12 @@ import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Logger;
-
 /**
  * @author dynmie
  */
 @AllArgsConstructor
 public class ServerConsoleHandler {
     private final Server server;
-    private final Logger logger;
     private final LineReader lineReader;
     private final CommandHandler commandHandler;
 
@@ -30,23 +24,7 @@ public class ServerConsoleHandler {
                     continue;
                 }
 
-                String label;
-                List<String> args;
-
-                List<String> split = Arrays.asList(line.split(" "));
-                if (split.size() > 1) {
-                    label = split.getFirst();
-                    args = split.subList(1, split.size());
-                } else {
-                    label = split.getFirst();
-                    args = Collections.emptyList();
-                }
-
-                try {
-                    commandHandler.handleCommand(label, Collections.unmodifiableList(args));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                commandHandler.execute(line);
             }
         } catch (UserInterruptException | EndOfFileException e) {
             server.shutdown();

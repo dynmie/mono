@@ -1,6 +1,7 @@
 package me.dynmie.mono.client.player;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.dynmie.mono.client.timer.PlaybackTimer;
 import me.dynmie.mono.client.utils.ConsoleUtils;
 import me.dynmie.mono.client.utils.FrameUtils;
@@ -30,11 +31,12 @@ public class VideoPlayer {
     private final File source;
     private volatile @Getter int width;
     private volatile @Getter int height;
-    private final boolean color;
-
+    private volatile @Getter @Setter boolean color;
 
     private volatile @Getter boolean running = false;
     private volatile @Getter boolean paused = false;
+
+    private @Setter Runnable onNaturalEnd = null;
 
     private Thread thread;
 
@@ -71,7 +73,7 @@ public class VideoPlayer {
 
     private void createThread() {
         if (running) {
-            throw new IllegalStateException("This video player is already running!");
+            throw new IllegalStateException("This getVideos player is already running!");
         }
         running = true;
         thread = Thread.startVirtualThread(() -> {
@@ -142,7 +144,7 @@ public class VideoPlayer {
 
                     lastTimestamp = frame.timestamp;
 
-                    // if frame is a video frame
+                    // if frame is a getVideos frame
                     if (frame.image != null) {
                         Frame imageFrame = frame.clone();
 
@@ -152,12 +154,12 @@ public class VideoPlayer {
                                 return;
                             }
 
-                            // sync video with audio
+                            // sync getVideos with audio
                             long delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
 
-                            // if video is faster than audio
+                            // if getVideos is faster than audio
                             if (delayMicros > 0) {
-                                // wait for audio to catch up with the video
+                                // wait for audio to catch up with the getVideos
                                 try {
                                     Thread.sleep(TimeUnit.MICROSECONDS.toMillis(delayMicros));
                                 } catch (InterruptedException e) {
@@ -197,7 +199,7 @@ public class VideoPlayer {
                     }
 
 
-                    // ensure that the audio doesn't go faster than the video
+                    // ensure that the audio doesn't go faster than the getVideos
                     long timeStampDeltaMicros = frame.timestamp - playbackTimer.elapsedMicros();
                     if (timeStampDeltaMicros > maxReadAheadBufferMicros) {
                         Thread.sleep(TimeUnit.MICROSECONDS.toMillis(timeStampDeltaMicros - maxReadAheadBufferMicros));
@@ -224,12 +226,16 @@ public class VideoPlayer {
 
             running = false;
             paused = false;
+
+            if (onNaturalEnd != null) {
+                onNaturalEnd.run();
+            }
         });
     }
 
     public void start() {
         if (running) {
-            throw new IllegalStateException("This video player is already running!");
+            throw new IllegalStateException("This getVideos player is already running!");
         }
         createThread();
     }

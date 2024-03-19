@@ -14,6 +14,7 @@ import me.dynmie.mono.server.data.ServerConfigHandler;
 import me.dynmie.mono.server.jeorge.ServerBinder;
 import me.dynmie.mono.server.network.connection.ConnectionHandler;
 import me.dynmie.mono.server.network.netty.NetworkHandler;
+import me.dynmie.mono.server.player.VideoHandler;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
@@ -78,18 +79,30 @@ public class Server {
 
         networkHandler = new NetworkHandler(logger, config.getNetworkInformation(), connectionHandler, sessionHandler, clientHandler);
 
+        VideoHandler videoHandler = new VideoHandler(config.getPlayerConfiguration(), logger);
+        videoHandler.initialize();
 
         ServerCommandHandlerConfiguration commandHandlerConfig = new ServerCommandHandlerConfiguration(
                 clientHandler
         );
         CommandHandler commandHandler = new CommandHandler(commandHandlerConfig, logger);
 
-        injector = Jeorge.createInjector(new ServerBinder(this, logger, sessionHandler, connectionHandler, clientHandler, networkHandler, commandHandler, config));
+        injector = Jeorge.createInjector(new ServerBinder(
+                this,
+                logger,
+                sessionHandler,
+                connectionHandler,
+                clientHandler,
+                networkHandler,
+                videoHandler,
+                commandHandler,
+                config
+        ));
 
         CommandRegistrationHandler commandRegistrationHandler = new CommandRegistrationHandler(injector, commandHandler);
         commandRegistrationHandler.initialize();
 
-        ServerConsoleHandler serverConsoleHandler = new ServerConsoleHandler(this, logger, lineReader, commandHandler);
+        ServerConsoleHandler serverConsoleHandler = new ServerConsoleHandler(this, lineReader, commandHandler);
 
         networkHandler.start();
 
