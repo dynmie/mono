@@ -6,7 +6,7 @@ import me.dynmie.mono.shared.packet.ready.ClientboundReadyPacketHandler;
 /**
  * @author dynmie
  */
-public class ClientboundPlayerSkipPacket extends Packet<ClientboundReadyPacketHandler> {
+public class ClientboundPlayerSkipPacket implements Packet<ClientboundReadyPacketHandler> {
     @Override
     public void handle(ClientboundReadyPacketHandler handler) {
         handler.onSkip(this);

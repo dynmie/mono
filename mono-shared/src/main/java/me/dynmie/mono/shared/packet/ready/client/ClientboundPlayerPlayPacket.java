@@ -6,7 +6,7 @@ import me.dynmie.mono.shared.packet.ready.ClientboundReadyPacketHandler;
 /**
  * @author dynmie
  */
-public class ClientboundPlayerPlayPacket extends Packet<ClientboundReadyPacketHandler> {
+public class ClientboundPlayerPlayPacket implements Packet<ClientboundReadyPacketHandler> {
     @Override
     public void handle(ClientboundReadyPacketHandler handler) {
         handler.onPlayerPlay(this);

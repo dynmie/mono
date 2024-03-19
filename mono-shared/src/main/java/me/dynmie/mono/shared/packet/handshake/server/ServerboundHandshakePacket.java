@@ -6,7 +6,7 @@ import me.dynmie.mono.shared.packet.handshake.ServerboundHandshakePacketHandler;
 /**
  * @author dynmie
  */
-public class ServerboundHandshakePacket extends Packet<ServerboundHandshakePacketHandler> {
+public class ServerboundHandshakePacket implements Packet<ServerboundHandshakePacketHandler> {
     @Override
     public void handle(ServerboundHandshakePacketHandler handler) {
         handler.onHandshake(this);

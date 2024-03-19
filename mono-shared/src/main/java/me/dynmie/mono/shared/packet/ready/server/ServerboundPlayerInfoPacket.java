@@ -11,7 +11,7 @@ import me.dynmie.mono.shared.player.PlayerInfo;
  */
 @Getter
 @AllArgsConstructor
-public class ServerboundPlayerInfoPacket extends Packet<ServerboundReadyPacketHandler> {
+public class ServerboundPlayerInfoPacket implements Packet<ServerboundReadyPacketHandler> {
     private final PlayerInfo playerInfo;
 
     @Override

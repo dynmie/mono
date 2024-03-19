@@ -11,7 +11,7 @@ import me.dynmie.mono.shared.player.PlayerPlaylistInfo;
  */
 @Getter
 @AllArgsConstructor
-public class ServerboundPlayerPlaylistUpdatePacket extends Packet<ServerboundReadyPacketHandler> {
+public class ServerboundPlayerPlaylistUpdatePacket implements Packet<ServerboundReadyPacketHandler> {
     private final PlayerPlaylistInfo playlistInfo;
 
     @Override

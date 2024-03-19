@@ -11,7 +11,7 @@ import me.dynmie.mono.shared.session.ClientSession;
  */
 @Getter
 @AllArgsConstructor
-public class ClientboundLoginResponsePacket extends Packet<ClientboundLoginPacketHandler> {
+public class ClientboundLoginResponsePacket implements Packet<ClientboundLoginPacketHandler> {
     private final ClientSession session;
 
     @Override
