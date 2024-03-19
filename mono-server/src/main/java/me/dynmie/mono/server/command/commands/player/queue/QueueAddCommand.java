@@ -21,7 +21,7 @@ public class QueueAddCommand extends BaseCommand {
         super(List.of("add"));
 
         setDescription("Add a video to a client's queue");
-        setUsage("<client>");
+        setUsage("<client> <id>");
 
         setMinArgs(2);
         setMaxArgs(2);
