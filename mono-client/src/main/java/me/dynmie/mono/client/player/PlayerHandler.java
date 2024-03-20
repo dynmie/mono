@@ -98,12 +98,23 @@ public class PlayerHandler {
         boolean color = this.config.isColor();
         this.config = config;
         if (player != null) {
-            // fix color not being white when changing colors
-            if (color && !config.isColor()) {
-                ConsoleUtils.resetCursorPosition();
-                terminal.writer().println(FrameUtils.getColorEscapeCode(255, 255, 255));
-            }
             player.setConfig(config);
+
+            // fix color not being white when changing colors
+            // i'm sorry, i was lazy. i know this isn't a good solution.
+            Thread.startVirtualThread(() -> {
+                if (!config.isColor() && color) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    if (!this.config.isColor()) {
+                        ConsoleUtils.resetCursorPosition();
+                        terminal.writer().print(FrameUtils.getColorEscapeCode(255, 255, 255));
+                    }
+                }
+            });
         }
     }
 
