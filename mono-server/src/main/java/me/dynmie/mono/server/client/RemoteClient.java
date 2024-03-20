@@ -3,10 +3,8 @@ package me.dynmie.mono.server.client;
 import lombok.Getter;
 import lombok.Setter;
 import me.dynmie.mono.server.network.connection.ClientConnection;
-import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPausePacket;
-import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPlayPacket;
-import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPlaylistUpdatePacket;
-import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerSkipPacket;
+import me.dynmie.mono.shared.packet.ready.client.*;
+import me.dynmie.mono.shared.player.PlayerConfig;
 import me.dynmie.mono.shared.player.PlayerInfo;
 import me.dynmie.mono.shared.player.PlayerPlaylistInfo;
 import me.dynmie.mono.shared.player.PlayerVideoInfo;
@@ -24,11 +22,17 @@ public class RemoteClient {
     private final @Getter ClientConnection connection;
     private final @Getter List<PlayerVideoInfo> queue;
     private @Getter @Setter PlayerInfo playerInfo = null;
+    private @Getter PlayerConfig config = new PlayerConfig(true, false);
 
     public RemoteClient(ClientSession session, ClientConnection connection, List<PlayerVideoInfo> queue) {
         this.session = session;
         this.connection = connection;
         this.queue = queue;
+    }
+
+    public void setConfig(PlayerConfig config) {
+        this.config = config;
+        connection.sendPacket(new ClientboundPlayerConfigUpdatePacket(config));
     }
 
     public void setPlaylistInfo(PlayerPlaylistInfo playlistInfo) {

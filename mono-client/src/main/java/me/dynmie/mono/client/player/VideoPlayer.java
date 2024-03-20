@@ -5,6 +5,7 @@ import lombok.Setter;
 import me.dynmie.mono.client.timer.PlaybackTimer;
 import me.dynmie.mono.client.utils.ConsoleUtils;
 import me.dynmie.mono.client.utils.FrameUtils;
+import me.dynmie.mono.shared.player.PlayerConfig;
 import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
@@ -31,7 +32,7 @@ public class VideoPlayer {
     private final File source;
     private volatile @Getter int width;
     private volatile @Getter int height;
-    private volatile @Getter @Setter boolean color;
+    private volatile @Setter PlayerConfig config;
 
     private volatile @Getter boolean running = false;
     private volatile @Getter boolean paused = false;
@@ -40,12 +41,12 @@ public class VideoPlayer {
 
     private Thread thread;
 
-    public VideoPlayer(OutputStream outputStream, File source, int width, int height, boolean color) {
+    public VideoPlayer(OutputStream outputStream, File source, int width, int height, PlayerConfig config) {
         this.outputStream = outputStream;
         this.source = source;
         this.width = width;
         this.height = height;
-        this.color = color;
+        this.config = config;
     }
 
     public void setResolution(int width, int height) {
@@ -148,7 +149,6 @@ public class VideoPlayer {
                     if (frame.image != null) {
                         Frame imageFrame = frame.clone();
 
-                        final boolean col = color;
                         imageExecutor.submit(() -> {
                             if (width != imageFrame.imageWidth || height != imageFrame.imageHeight) {
                                 return;
@@ -171,7 +171,7 @@ public class VideoPlayer {
 
                             BufferedImage image = converter.convert(imageFrame);
                             imageFrame.close();
-                            String text = FrameUtils.convertFrameToText(image, col);
+                            String text = FrameUtils.convertFrameToText(image, config);
 
                             ConsoleUtils.resetCursorPosition();
                             writer.append(text);

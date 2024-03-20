@@ -6,10 +6,7 @@ import me.dynmie.mono.server.command.commands.ServerHelpCommand;
 import me.dynmie.mono.server.command.commands.ShutdownCommand;
 import me.dynmie.mono.server.command.commands.clients.ClientInfoCommand;
 import me.dynmie.mono.server.command.commands.clients.ClientsCommand;
-import me.dynmie.mono.server.command.commands.player.NowPlayingCommand;
-import me.dynmie.mono.server.command.commands.player.PauseCommand;
-import me.dynmie.mono.server.command.commands.player.PlayCommand;
-import me.dynmie.mono.server.command.commands.player.SkipCommand;
+import me.dynmie.mono.server.command.commands.player.*;
 import me.dynmie.mono.server.command.commands.player.queue.QueueCommand;
 import me.dynmie.mono.server.command.handler.BaseCommand;
 import me.dynmie.mono.server.command.handler.CommandHandler;
@@ -30,7 +27,9 @@ public class CommandRegistrationHandler {
             ClientsCommand.class,
             NowPlayingCommand.class,
             QueueCommand.class,
-            ShutdownCommand.class
+            ShutdownCommand.class,
+            ToggleColorCommand.class,
+            ToggleTrueColorCommand.class
     );
 
     private final Injector injector;

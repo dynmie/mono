@@ -2,7 +2,10 @@ package me.dynmie.mono.client.player;
 
 import lombok.Getter;
 import me.dynmie.mono.client.network.NetworkHandler;
+import me.dynmie.mono.client.utils.ConsoleUtils;
+import me.dynmie.mono.client.utils.FrameUtils;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerInfoPacket;
+import me.dynmie.mono.shared.player.PlayerConfig;
 import me.dynmie.mono.shared.player.PlayerInfo;
 import org.jline.terminal.Terminal;
 
@@ -20,6 +23,8 @@ public class PlayerHandler {
 
     private Thread thread;
     public static final Object LOCK = new Object();
+
+    private volatile PlayerConfig config = new PlayerConfig(true, false);
 
     public PlayerHandler(Terminal terminal, QueueHandler queueHandler, NetworkHandler networkHandler) {
         this.terminal = terminal;
@@ -73,7 +78,7 @@ public class PlayerHandler {
 
     public void readyFor(File file) {
         stop();
-        player = new VideoPlayer(terminal.output(), file, terminal.getWidth(), terminal.getHeight(), true);
+        player = new VideoPlayer(terminal.output(), file, terminal.getWidth(), terminal.getHeight(), config);
         player.start();
     }
 
@@ -86,6 +91,19 @@ public class PlayerHandler {
     public void stop() {
         if (player != null) {
             player.stop();
+        }
+    }
+
+    public void setConfig(PlayerConfig config) {
+        boolean color = this.config.isColor();
+        this.config = config;
+        if (player != null) {
+            // fix color not being white when changing colors
+            if (color && !config.isColor()) {
+                ConsoleUtils.resetCursorPosition();
+                terminal.writer().println(FrameUtils.getColorEscapeCode(255, 255, 255));
+            }
+            player.setConfig(config);
         }
     }
 

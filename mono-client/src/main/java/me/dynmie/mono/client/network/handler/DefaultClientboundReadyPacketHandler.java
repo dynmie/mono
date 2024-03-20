@@ -9,10 +9,7 @@ import me.dynmie.mono.client.player.PlayerHandler;
 import me.dynmie.mono.client.player.QueueHandler;
 import me.dynmie.mono.client.player.VideoPlayer;
 import me.dynmie.mono.shared.packet.ready.ClientboundReadyPacketHandler;
-import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPausePacket;
-import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPlayPacket;
-import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPlaylistUpdatePacket;
-import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerSkipPacket;
+import me.dynmie.mono.shared.packet.ready.client.*;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerInfoPacket;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerPlaylistUpdatePacket;
 import me.dynmie.mono.shared.player.PlayerInfo;
@@ -117,5 +114,10 @@ public class DefaultClientboundReadyPacketHandler implements ClientboundReadyPac
         connection.sendPacket(new ServerboundPlayerPlaylistUpdatePacket(
                 new PlayerPlaylistInfo(queueHandler.getQueue())
         ));
+    }
+
+    @Override
+    public void onPlayerConfigUpdate(ClientboundPlayerConfigUpdatePacket packet) {
+        playerHandler.setConfig(packet.getConfig());
     }
 }
