@@ -20,6 +20,7 @@ import java.nio.ShortBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * @author dynmie
@@ -166,7 +167,6 @@ public class VideoPlayer {
                                 throw new RuntimeException(e);
                             }
                         }
-
                         writer.write(ConsoleUtils.getResetCursorPositionEscapeCode() + text);
                         writer.flush();
                     });
@@ -213,8 +213,6 @@ public class VideoPlayer {
 
             grabber.stop();
             grabber.release();
-
-            writer.close();
         } catch (FrameGrabber.Exception | LineUnavailableException | InterruptedException e) {
             throw new RuntimeException(e);
         }
