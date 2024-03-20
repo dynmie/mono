@@ -7,7 +7,6 @@ import com.github.kiulian.downloader.model.videos.VideoInfo;
 import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import me.dynmie.mono.client.QClient;
 import me.dynmie.mono.client.network.NetworkHandler;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerPlaylistUpdatePacket;

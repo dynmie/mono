@@ -1,7 +1,6 @@
 package me.dynmie.mono.server.network.netty;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -20,7 +19,8 @@ public class SerializableEncoder extends ChannelOutboundHandlerAdapter {
             return;
         }
         byte[] bytes = SerializationUtils.serialize(serializable);
-        ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
+        ByteBuf byteBuf = ctx.alloc().buffer(bytes.length);
+        byteBuf.writeBytes(bytes);
         ctx.write(byteBuf);
     }
 }
