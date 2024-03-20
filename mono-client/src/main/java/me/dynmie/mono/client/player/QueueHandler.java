@@ -55,16 +55,26 @@ public class QueueHandler {
         if (thread != null) return;
 
         thread = Thread.startVirtualThread(() -> {
-            if (queue.isEmpty()) return;
+            if (queue.isEmpty()) {
+                thread = null;
+                return;
+            }
             PlayerVideoInfo first = queue.getFirst();
 
             RequestVideoInfo requestVideoInfo = new RequestVideoInfo(first.getVideoId());
             VideoInfo videoInfo;
             try {
-                videoInfo = downloader.getVideoInfo(requestVideoInfo).data(2, TimeUnit.MINUTES);
+                videoInfo = downloader.getVideoInfo(requestVideoInfo).data(30, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 throw new RuntimeException(e);
             }
+            if (!videoInfo.details().isDownloadable()) {
+                queue.removeFirst();
+                thread = null;
+                update(override);
+                return;
+            }
+
             VideoFormat videoFormat = videoInfo.bestVideoWithAudioFormat();
 
             String fileName = first.getVideoId();
@@ -77,7 +87,12 @@ public class QueueHandler {
                         .saveTo(outputDirectory)
                         .renameTo(fileName);
 
-                File output = downloader.downloadVideoFile(request).data();
+                File output;
+                try {
+                    output = downloader.downloadVideoFile(request).data(2, TimeUnit.MINUTES);
+                } catch (TimeoutException e) {
+                    throw new RuntimeException(e);
+                }
 
                 nextVideo = new ActualVideoInfo(output, first);
             }
