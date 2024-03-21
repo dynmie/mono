@@ -3,7 +3,7 @@ package me.dynmie.mono.client.utils;
 import me.dynmie.mono.shared.player.PlayerConfig;
 
 import java.awt.image.BufferedImage;
-import java.util.StringJoiner;
+import java.util.stream.IntStream;
 
 /**
  * @author dynmie
@@ -22,29 +22,35 @@ public class FrameUtils {
     public static String convertFrameToText(BufferedImage image, PlayerConfig config) {
         boolean color = config.isColor();
 
-        StringJoiner joiner = new StringJoiner("\n");
-        for (int y = 0; y < image.getHeight(); y++) {
-            StringBuilder builder = new StringBuilder();
-            int prevColor = -1;
+        int width = image.getWidth();
+        int height = image.getHeight();
 
-            for (int x = 0; x < image.getWidth(); x++) {
-                int currentColor = image.getRGB(x, y);
-                // some optimizations
-                if (color && currentColor != prevColor) {
-                    builder.append(getRGBColoredCharacter(currentColor, config.isTrueColor()));
-                    prevColor = currentColor;
-                } else if (color) {
-                    float brightness = RGBUtils.getBrightness(currentColor);
-                    builder.append(getRGBBrightnessCharFromColor(brightness, config.isTrueColor()));
-                } else {
-                    float brightness = RGBUtils.getBrightness(currentColor);
-                    builder.append(getBrightnessCharFromColor(brightness));
-                }
-            }
-            joiner.add(builder);
-        }
+        String[] lines = new String[height];
+        IntStream.range(0, height)
+                .parallel()
+                .forEach(y -> {
+                    StringBuilder builder = new StringBuilder();
+                    int prevColor = -1;
 
-        return joiner.toString();
+                    for (int x = 0; x < width; x++) {
+                        int currentColor = image.getRGB(x, y);
+                        // some optimizations
+                        if (color && currentColor != prevColor) {
+                            builder.append(getRGBColoredCharacter(currentColor, config.isTrueColor()));
+                            prevColor = currentColor;
+                        } else if (color) {
+                            float brightness = RGBUtils.getBrightness(currentColor);
+                            builder.append(getRGBBrightnessCharFromColor(brightness, config.isTrueColor()));
+                        } else {
+                            float brightness = RGBUtils.getBrightness(currentColor);
+                            builder.append(getBrightnessCharFromColor(brightness));
+                        }
+                    }
+
+                    lines[y] = builder.toString();
+                });
+
+        return String.join("\n", lines);
     }
 
     private static char getBrightnessCharFromColor(float brightness) {

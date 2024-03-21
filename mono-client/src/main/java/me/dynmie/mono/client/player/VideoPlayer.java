@@ -2,6 +2,7 @@ package me.dynmie.mono.client.player;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import me.dynmie.mono.client.timer.PlaybackTimer;
 import me.dynmie.mono.client.utils.ConsoleUtils;
 import me.dynmie.mono.client.utils.FrameUtils;
@@ -70,6 +71,7 @@ public class VideoPlayer {
         }
     }
 
+    @SneakyThrows
     private void run() {
         try (
                 FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(source);
@@ -102,7 +104,7 @@ public class VideoPlayer {
                 playbackTimer = PlaybackTimer.create();
             }
 
-            ExecutorService imageExecutor = Executors.newVirtualThreadPerTaskExecutor();
+            ExecutorService imageExecutor = Executors.newSingleThreadExecutor();
             ExecutorService audioExecutor = Executors.newSingleThreadExecutor();
 
             long maxReadAheadBufferMicros = TimeUnit.MILLISECONDS.toMicros(1000);
@@ -114,11 +116,8 @@ public class VideoPlayer {
             while (!Thread.interrupted() && running) {
                 synchronized (this) {
                     while (paused) {
-                        try {
-                            wait();
-                            if (!running) return;
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
+                        wait();
+                        if (!running) {
                             return;
                         }
                     }
@@ -147,13 +146,13 @@ public class VideoPlayer {
                             return;
                         }
 
-                        BufferedImage image = converter.convert(imageFrame);
-                        imageFrame.close();
-                        String text = FrameUtils.convertFrameToText(image, config);
-
                         // sync getVideos with audio
                         long delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
                         if (delayMicros < 0) return; // we're behind! skip the frame.
+
+                        BufferedImage image = converter.convert(imageFrame);
+                        imageFrame.close();
+                        String text = FrameUtils.convertFrameToText(image, config);
 
                         // recalculate delta
                         delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
@@ -166,6 +165,7 @@ public class VideoPlayer {
                                 throw new RuntimeException(e);
                             }
                         }
+
                         writer.write(ConsoleUtils.getResetCursorPositionEscapeCode() + text);
                         writer.flush();
                     });
