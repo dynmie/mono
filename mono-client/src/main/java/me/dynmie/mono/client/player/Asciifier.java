@@ -34,7 +34,6 @@ public class Asciifier {
 
         String[] lines = new String[height];
         IntStream.range(0, height)
-                .parallel() // we have cores, use them!
                 .forEach(y -> {
                     StringBuilder builder = new StringBuilder();
                     int prevColor = -1;
@@ -49,19 +48,14 @@ public class Asciifier {
                         float brightness = RGBUtils.getBrightness(red, green, blue); // percentage
 
                         if (textDithering && !fullPixel) {
-                            float thisError;
-                            synchronized (textDitheringErrors) {
-                                thisError = textDitheringErrors[x][y];
-                            }
+                            float thisError = textDitheringErrors[x][y];
 
                             brightness += thisError;
 
                             float perceivedBrightness = (float) indexFromBrightness(brightness) / (brightnessLevels.length - 1);
                             float error = (brightness - perceivedBrightness) * DITHER_FACTOR;
 
-                            synchronized (textDitheringErrors) {
-                                writeDitheringError(width, height, x, y, error, textDitheringErrors);
-                            }
+                            writeDitheringError(width, height, x, y, error, textDitheringErrors);
 
                             brightness = Math.clamp(brightness, 0, 1); // min 0, max 1
                         }
