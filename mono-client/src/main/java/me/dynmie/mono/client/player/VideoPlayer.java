@@ -104,6 +104,7 @@ public class VideoPlayer {
                 playbackTimer = PlaybackTimer.create();
             }
 
+            ExecutorService renderingExecutor = Executors.newSingleThreadExecutor();
             ExecutorService imageExecutor = Executors.newSingleThreadExecutor();
             ExecutorService audioExecutor = Executors.newSingleThreadExecutor();
 
@@ -141,33 +142,43 @@ public class VideoPlayer {
                 if (frame.image != null) {
                     Frame imageFrame = frame.clone();
 
-                    imageExecutor.submit(() -> {
+                    renderingExecutor.submit(() -> {
                         if (width != imageFrame.imageWidth || height != imageFrame.imageHeight) {
                             return;
                         }
 
                         // sync getVideos with audio
-                        long delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
-                        if (delayMicros < 0) return; // we're behind! skip the frame.
+                        long preDelayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
+                        if (preDelayMicros < 0) return; // we're behind! skip the frame.
 
                         BufferedImage image = converter.convert(imageFrame);
                         imageFrame.close();
-                        String text = FrameUtils.convertFrameToText(image, config);
+                        String text = ConsoleUtils.getResetCursorPositionEscapeCode() + FrameUtils.convertFrameToText(image, config);
 
-                        // recalculate delta
-                        delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
-                        // if getVideos is faster than audio
-                        if (delayMicros > 0) {
-                            // wait for audio to catch up with the getVideos
-                            try {
-                                Thread.sleep(TimeUnit.MICROSECONDS.toMillis(delayMicros));
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
+                        imageExecutor.submit(() -> {
+                            if (width != imageFrame.imageWidth || height != imageFrame.imageHeight) {
+                                return;
                             }
-                        }
 
-                        writer.write(ConsoleUtils.getResetCursorPositionEscapeCode() + text);
-                        writer.flush();
+                            // sync getVideos with audio
+                            long delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
+                            if (delayMicros < 0) return; // we're behind! skip the frame.
+
+                            // recalculate delta
+                            delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
+                            // if getVideos is faster than audio
+                            if (delayMicros > 0) {
+                                // wait for audio to catch up with the getVideos
+                                try {
+                                    Thread.sleep(TimeUnit.MICROSECONDS.toMillis(delayMicros));
+                                } catch (InterruptedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+
+                            writer.write(text);
+                            writer.flush();
+                        });
                     });
                 } else if (frame.samples != null) { // if frame is audio frame
                     if (audioLine == null) {
@@ -201,6 +212,10 @@ public class VideoPlayer {
             audioExecutor.shutdownNow();
             audioExecutor.awaitTermination(10, TimeUnit.SECONDS);
             audioExecutor.close();
+
+            renderingExecutor.shutdownNow();
+            renderingExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            renderingExecutor.close();
 
             imageExecutor.shutdownNow();
             imageExecutor.awaitTermination(10, TimeUnit.SECONDS);

@@ -10,14 +10,8 @@ import java.util.stream.IntStream;
  */
 public class FrameUtils {
 
-    public static final char[] BRIGHTNESS_LEVELS = "          `.-':_,^=;><+!rc*/z?sLTv)J7(|F{C}fI31tlu[neoZ5Yxya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@@@"
-            .toCharArray();
-
-    public static final char[] RGB_BRIGHTNESS_LEVELS = "     `.-':_,^=;><+!rc*/z?sLTv)J7(|F{C}fI31tlu[neoZ5Yxya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@@@"
-            .toCharArray();
-
-    @SuppressWarnings("UnnecessaryUnicodeEscape") // apparently it doesn't work if you just copy and paste lmao
-    public static final char TRUE_COLOR_CHAR = '\u2588';
+    public static final char[] BRIGHTNESS_LEVELS = " .-+*wGHM#&%".toCharArray();
+    public static final char TRUE_COLOR_CHAR = ' ';
 
     public static String convertFrameToText(BufferedImage image, PlayerConfig config) {
         boolean color = config.isColor();
@@ -35,7 +29,7 @@ public class FrameUtils {
                     for (int x = 0; x < width; x++) {
                         int currentColor = image.getRGB(x, y);
                         // some optimizations
-                        if (color && currentColor != prevColor) {
+                        if (color && (x == 0 || currentColor != prevColor)) {
                             builder.append(getRGBColoredCharacter(currentColor, config.isTrueColor()));
                             prevColor = currentColor;
                         } else if (color) {
@@ -49,7 +43,6 @@ public class FrameUtils {
 
                     lines[y] = builder.toString();
                 });
-
         return String.join("\n", lines);
     }
 
@@ -61,7 +54,7 @@ public class FrameUtils {
         if (trueColor) {
             return TRUE_COLOR_CHAR;
         }
-        return RGB_BRIGHTNESS_LEVELS[(int) (brightness * (RGB_BRIGHTNESS_LEVELS.length - 1))];
+        return BRIGHTNESS_LEVELS[(int) (brightness * (BRIGHTNESS_LEVELS.length - 1))];
     }
 
     public static String getRGBColoredCharacter(int color, boolean trueColor) {
@@ -73,13 +66,12 @@ public class FrameUtils {
         float brightness = (red * 0.2126f + green * 0.7152f + blue * 0.0722f) / 255;
 
         char brightnessChar = getRGBBrightnessCharFromColor(brightness, trueColor);
-        if (brightnessChar == ' ') return " ";
+        if (brightnessChar == ' ' && !trueColor) return " ";
+        if (trueColor) {
+            return ConsoleUtils.getBackgroundColorEscapeCode(red, green, blue) + brightnessChar;
+        }
 
-        return getColorEscapeCode(red, green, blue) + brightnessChar;
-    }
-
-    public static String getColorEscapeCode(int red, int green, int blue) {
-        return "\033[38;2;%s;%s;%sm".formatted(red, green, blue);
+        return ConsoleUtils.getForegroundColorEscapeCode(red, green, blue) + brightnessChar;
     }
 
 }

@@ -3,7 +3,6 @@ package me.dynmie.mono.client.player;
 import lombok.Getter;
 import me.dynmie.mono.client.network.NetworkHandler;
 import me.dynmie.mono.client.utils.ConsoleUtils;
-import me.dynmie.mono.client.utils.FrameUtils;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerInfoPacket;
 import me.dynmie.mono.shared.player.PlayerConfig;
 import me.dynmie.mono.shared.player.PlayerInfo;
@@ -78,7 +77,7 @@ public class PlayerHandler {
 
     public void readyFor(File file) {
         stop();
-        player = new VideoPlayer(terminal.output(), file, terminal.getWidth(), terminal.getHeight(), config);
+        player = new VideoPlayer(System.out, file, terminal.getWidth(), terminal.getHeight(), config);
         player.start();
     }
 
@@ -94,8 +93,14 @@ public class PlayerHandler {
         }
     }
 
+    public void pause() {
+        if (player != null) {
+            player.pause();
+        }
+    }
+
     public void setConfig(PlayerConfig config) {
-        boolean color = this.config.isColor();
+        PlayerConfig playerConfig = this.config;
         this.config = config;
         if (player != null) {
             player.setConfig(config);
@@ -103,16 +108,16 @@ public class PlayerHandler {
             // fix color not being white when changing colors
             // i'm sorry, i was lazy. i know this isn't a good solution.
             Thread.startVirtualThread(() -> {
-                if (!config.isColor() && color) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    if (!this.config.isColor()) {
-                        ConsoleUtils.resetCursorPosition();
-                        terminal.writer().print(FrameUtils.getColorEscapeCode(255, 255, 255));
-                    }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                if (!this.config.isColor() && playerConfig.isColor()) {
+                    System.out.print(ConsoleUtils.getForegroundResetCode());
+                }
+                if (!this.config.isTrueColor() && playerConfig.isTrueColor()) {
+                    System.out.print(ConsoleUtils.getBackgroundResetCode());
                 }
             });
         }

@@ -26,4 +26,20 @@ public class ConsoleUtils {
         return getCursorPositionEscapeCode(0, 0);
     }
 
+    public static String getForegroundResetCode() {
+//        return "\033[39m";
+        return getForegroundColorEscapeCode(255, 255, 255);
+    }
+
+    public static String getBackgroundResetCode() {
+        return "\033[49m";
+    }
+
+    public static String getForegroundColorEscapeCode(int red, int green, int blue) {
+        return "\033[38;2;%s;%s;%sm".formatted(red, green, blue);
+    }
+
+    public static String getBackgroundColorEscapeCode(int red, int green, int blue) {
+        return "\033[48;2;%s;%s;%sm".formatted(red, green, blue);
+    }
 }
