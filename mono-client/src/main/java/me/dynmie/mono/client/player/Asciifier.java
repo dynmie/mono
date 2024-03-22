@@ -119,8 +119,4 @@ public class Asciifier {
         }
     }
 
-    private static int clamp255(int value) {
-        return Math.min(Math.max(value, 0), 255);
-    }
-
 }
