@@ -77,7 +77,11 @@ public class PlayerHandler {
 
     public void readyFor(File file) {
         stop();
-        player = new VideoPlayer(System.out, file, terminal.getWidth(), terminal.getHeight(), config);
+        player = new VideoPlayer(System.out, file, terminal.getWidth(), terminal.getHeight(), new Asciifier(
+                config.isColor(),
+                config.isTrueColor(),
+                Asciifier.DEFAULT_BRIGHTNESS_LEVELS
+        ));
         player.start();
     }
 
@@ -103,7 +107,13 @@ public class PlayerHandler {
         PlayerConfig playerConfig = this.config;
         this.config = config;
         if (player != null) {
-            player.setConfig(config);
+            player.setAsciifier(
+                    new Asciifier(
+                            config.isColor(),
+                            config.isTrueColor(),
+                            Asciifier.DEFAULT_BRIGHTNESS_LEVELS
+                    )
+            );
 
             // fix color not being white when changing colors
             // i'm sorry, i was lazy. i know this isn't a good solution.

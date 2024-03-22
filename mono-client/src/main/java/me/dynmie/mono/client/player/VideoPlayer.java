@@ -5,8 +5,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import me.dynmie.mono.client.timer.PlaybackTimer;
 import me.dynmie.mono.client.utils.ConsoleUtils;
-import me.dynmie.mono.client.utils.FrameUtils;
-import me.dynmie.mono.shared.player.PlayerConfig;
 import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
@@ -29,23 +27,21 @@ public class VideoPlayer {
 
     private final OutputStream outputStream;
     private final File source;
+    private volatile @Getter @Setter Asciifier asciifier;
     private volatile @Getter int width;
     private volatile @Getter int height;
-    private volatile @Setter PlayerConfig config;
 
     private volatile @Getter boolean running = false;
     private volatile @Getter boolean paused = false;
 
-    private @Setter Runnable onNaturalEnd = null;
-
     private Thread thread;
 
-    public VideoPlayer(OutputStream outputStream, File source, int width, int height, PlayerConfig config) {
+    public VideoPlayer(OutputStream outputStream, File source, int width, int height, Asciifier asciifier) {
         this.outputStream = outputStream;
         this.source = source;
         this.width = width;
         this.height = height;
-        this.config = config;
+        this.asciifier = asciifier;
     }
 
     public void setResolution(int width, int height) {
@@ -153,7 +149,7 @@ public class VideoPlayer {
 
                         BufferedImage image = converter.convert(imageFrame);
                         imageFrame.close();
-                        String text = ConsoleUtils.getResetCursorPositionEscapeCode() + FrameUtils.convertFrameToText(image, config);
+                        String text = ConsoleUtils.getResetCursorPositionEscapeCode() + asciifier.createFrame(image);
 
                         imageExecutor.submit(() -> {
                             if (width != imageFrame.imageWidth || height != imageFrame.imageHeight) {
@@ -233,10 +229,6 @@ public class VideoPlayer {
 
         running = false;
         paused = false;
-
-        if (onNaturalEnd != null) {
-            onNaturalEnd.run();
-        }
     }
 
     private void createThread() {
