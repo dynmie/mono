@@ -227,6 +227,8 @@ public class VideoPlayer {
             throw new RuntimeException(e);
         }
 
+        ConsoleUtils.resetCursorPosition();
+
         running = false;
         paused = false;
     }

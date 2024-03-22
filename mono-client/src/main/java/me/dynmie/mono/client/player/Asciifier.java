@@ -17,6 +17,7 @@ public class Asciifier {
     public static final int DITHER_NEIGHBOR_BOTTOM_LEFT_FACTOR = 3;
     public static final int DITHER_NEIGHBOR_BOTTOM_FACTOR = 5;
     public static final int DITHER_NEIGHBOR_BOTTOM_RIGHT_FACTOR = 1;
+    public static final int COLOR_BATCHING_THRESHOLD = 2;
 
     public static final char[] DEFAULT_BRIGHTNESS_LEVELS = " .-+*wGHM#&%".toCharArray();
 
@@ -33,7 +34,7 @@ public class Asciifier {
 
         String[] lines = new String[height];
         IntStream.range(0, height)
-//                .parallel() // we have cores, use them!
+                .parallel() // we have cores, use them!
                 .forEach(y -> {
                     StringBuilder builder = new StringBuilder();
                     int prevColor = -1;
@@ -48,20 +49,26 @@ public class Asciifier {
                         float brightness = RGBUtils.getBrightness(red, green, blue); // percentage
 
                         if (textDithering && !fullPixel) {
-                            float thisError = textDitheringErrors[x][y];
+                            float thisError;
+                            synchronized (textDitheringErrors) {
+                                thisError = textDitheringErrors[x][y];
+                            }
+
                             brightness += thisError;
 
                             float perceivedBrightness = (float) indexFromBrightness(brightness) / (brightnessLevels.length - 1);
                             float error = (brightness - perceivedBrightness) * DITHER_FACTOR;
 
-                            writeDitheringError(width, height, x, y, error, textDitheringErrors);
+                            synchronized (textDitheringErrors) {
+                                writeDitheringError(width, height, x, y, error, textDitheringErrors);
+                            }
 
                             brightness = Math.clamp(brightness, 0, 1); // min 0, max 1
                         }
 
                         if (color) {
                             // some optimizations
-                            if (x == 0 || currentColor != prevColor) {
+                            if (x == 0 || !isAlmostSameColor(currentColor, prevColor)) {
                                 char brightnessChar = getRGBBrightnessCharFromColor(brightness);
 
                                 String ret;
@@ -101,6 +108,26 @@ public class Asciifier {
             return ' ';
         }
         return brightnessLevels[indexFromBrightness(brightness)];
+    }
+
+    private static boolean isAlmostSameColor(int first, int second) {
+        int red1 = (first >> 16) & 0xff;
+        int green1 = (first >> 8) & 0xff;
+        int blue1 = first & 0xff;
+
+        int red2 = (second >> 16) & 0xff;
+        int green2 = (second >> 8) & 0xff;
+        int blue2 = second & 0xff;
+
+        int redDiff = Math.abs(red1 - red2);
+        int greenDiff = Math.abs(green1 - green2);
+        int blueDiff = Math.abs(blue1 - blue2);
+
+        // Calculate the color distance
+        double distance = Math.sqrt(redDiff * redDiff + greenDiff * greenDiff + blueDiff * blueDiff);
+
+        // Check if it's within the threshold
+        return distance < COLOR_BATCHING_THRESHOLD;
     }
 
     private static void writeDitheringError(int width, int height, int x, int y, float error, float[][] errors) {
