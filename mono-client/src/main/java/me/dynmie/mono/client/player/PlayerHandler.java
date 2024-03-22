@@ -23,7 +23,7 @@ public class PlayerHandler {
     private Thread thread;
     public static final Object LOCK = new Object();
 
-    private volatile PlayerConfig config = new PlayerConfig(true, false);
+    private volatile PlayerConfig config = new PlayerConfig(true, false, true);
 
     public PlayerHandler(Terminal terminal, QueueHandler queueHandler, NetworkHandler networkHandler) {
         this.terminal = terminal;
@@ -79,7 +79,8 @@ public class PlayerHandler {
         stop();
         player = new VideoPlayer(System.out, file, terminal.getWidth(), terminal.getHeight(), new Asciifier(
                 config.isColor(),
-                config.isTrueColor(),
+                config.isFullPixel(),
+                config.isTextDithering(),
                 Asciifier.DEFAULT_BRIGHTNESS_LEVELS
         ));
         player.start();
@@ -110,7 +111,8 @@ public class PlayerHandler {
             player.setAsciifier(
                     new Asciifier(
                             config.isColor(),
-                            config.isTrueColor(),
+                            config.isFullPixel(),
+                            config.isTextDithering(),
                             Asciifier.DEFAULT_BRIGHTNESS_LEVELS
                     )
             );
@@ -126,7 +128,7 @@ public class PlayerHandler {
                 if (!this.config.isColor() && playerConfig.isColor()) {
                     System.out.print(ConsoleUtils.getForegroundResetCode());
                 }
-                if (!this.config.isTrueColor() && playerConfig.isTrueColor()) {
+                if (!this.config.isFullPixel() && playerConfig.isFullPixel()) {
                     System.out.print(ConsoleUtils.getBackgroundResetCode());
                 }
             });

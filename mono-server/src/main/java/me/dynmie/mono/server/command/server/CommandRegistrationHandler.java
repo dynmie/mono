@@ -8,6 +8,9 @@ import me.dynmie.mono.server.command.commands.clients.ClientInfoCommand;
 import me.dynmie.mono.server.command.commands.clients.ClientsCommand;
 import me.dynmie.mono.server.command.commands.player.*;
 import me.dynmie.mono.server.command.commands.player.queue.QueueCommand;
+import me.dynmie.mono.server.command.commands.player.toggle.ToggleColorCommand;
+import me.dynmie.mono.server.command.commands.player.toggle.ToggleTextDitheringCommand;
+import me.dynmie.mono.server.command.commands.player.toggle.ToggleTrueColorCommand;
 import me.dynmie.mono.server.command.handler.BaseCommand;
 import me.dynmie.mono.server.command.handler.CommandHandler;
 
@@ -29,7 +32,8 @@ public class CommandRegistrationHandler {
             QueueCommand.class,
             ShutdownCommand.class,
             ToggleColorCommand.class,
-            ToggleTrueColorCommand.class
+            ToggleTrueColorCommand.class,
+            ToggleTextDitheringCommand.class
     );
 
     private final Injector injector;

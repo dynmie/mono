@@ -11,10 +11,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PlayerConfig {
     private final boolean color;
-    private final boolean trueColor;
+    private final boolean fullPixel;
+    private final boolean textDithering;
 
     public Mutable toMutable() {
-        return new Mutable(color, trueColor);
+        return new Mutable(color, fullPixel, textDithering);
     }
 
     @Setter
@@ -22,10 +23,11 @@ public class PlayerConfig {
     @AllArgsConstructor
     public static class Mutable {
         private boolean color;
-        private boolean trueColor;
+        private boolean fullPixel;
+        private boolean textDithering;
 
         public PlayerConfig toImmutable() {
-            return new PlayerConfig(color, trueColor);
+            return new PlayerConfig(color, fullPixel, textDithering);
         }
     }
 }

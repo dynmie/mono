@@ -22,7 +22,7 @@ public class RemoteClient {
     private final @Getter ClientConnection connection;
     private final @Getter List<PlayerVideoInfo> queue;
     private @Getter @Setter PlayerInfo playerInfo = null;
-    private @Getter PlayerConfig config = new PlayerConfig(true, false);
+    private @Getter PlayerConfig config = new PlayerConfig(true, false, true);
 
     public RemoteClient(ClientSession session, ClientConnection connection, List<PlayerVideoInfo> queue) {
         this.session = session;

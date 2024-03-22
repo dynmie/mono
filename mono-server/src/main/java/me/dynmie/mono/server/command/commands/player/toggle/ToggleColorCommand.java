@@ -1,4 +1,4 @@
-package me.dynmie.mono.server.command.commands.player;
+package me.dynmie.mono.server.command.commands.player.toggle;
 
 import me.dynmie.mono.server.client.RemoteClient;
 import me.dynmie.mono.server.command.handler.BaseCommand;

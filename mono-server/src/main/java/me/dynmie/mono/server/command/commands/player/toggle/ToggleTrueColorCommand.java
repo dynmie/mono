@@ -1,4 +1,4 @@
-package me.dynmie.mono.server.command.commands.player;
+package me.dynmie.mono.server.command.commands.player.toggle;
 
 import me.dynmie.mono.server.client.RemoteClient;
 import me.dynmie.mono.server.command.handler.BaseCommand;
@@ -13,9 +13,9 @@ import java.util.List;
  */
 public class ToggleTrueColorCommand extends BaseCommand {
     public ToggleTrueColorCommand() {
-        super(List.of("toggletruecolor"));
+        super(List.of("togglefullpixel"));
 
-        setDescription("Get the player to toggle the truecolor state");
+        setDescription("Get the player to toggle the full pixel state");
         setUsage("<client>");
 
         setMinArgs(1);
@@ -28,7 +28,7 @@ public class ToggleTrueColorCommand extends BaseCommand {
     public CommandResult onExecute(CommandContext context) {
         RemoteClient client = context.getAt(0, RemoteClient.class);
         PlayerConfig.Mutable mutable = client.getConfig().toMutable();
-        mutable.setTrueColor(!mutable.isTrueColor());
+        mutable.setFullPixel(!mutable.isFullPixel());
         client.setConfig(mutable.toImmutable());
         return CommandResult.OK;
     }
