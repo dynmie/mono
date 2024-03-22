@@ -63,6 +63,18 @@ public class Asciifier {
                         if (color) {
                             // some optimizations
                             if (x == 0 || !isAlmostSameColor(currentColor, prevColor)) {
+                                if (!fullPixel) {
+                                    int maxComponent = Math.max(red, Math.max(green, blue));
+
+                                    // Ensure that the maximum component remains at its original value
+                                    double scaleFactor = 255.0 / maxComponent;
+
+                                    // Scale down all components proportionally
+                                    red = (int) (red * scaleFactor);
+                                    green = (int) (green * scaleFactor);
+                                    blue = (int) (blue * scaleFactor);
+                                }
+
                                 char brightnessChar = getRGBBrightnessCharFromColor(brightness);
 
                                 String ret;
