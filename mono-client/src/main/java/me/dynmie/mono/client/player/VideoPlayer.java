@@ -113,9 +113,16 @@ public class VideoPlayer {
             while (!Thread.interrupted() && running) {
                 synchronized (this) {
                     while (paused) {
+                        // NOTE: PAUSING WITHOUT AUDIO DOES NOT WORK.
+                        if (audioLine != null) {
+                            audioLine.stop();
+                        }
                         wait();
                         if (!running) {
                             return;
+                        }
+                        if (audioLine != null) {
+                            audioLine.start();
                         }
                     }
                 }
@@ -134,7 +141,7 @@ public class VideoPlayer {
 
                 lastTimestamp = frame.timestamp;
 
-                // if frame is a getVideos frame
+                // if frame is a video frame
                 if (frame.image != null) {
                     Frame imageFrame = frame.clone();
 
@@ -143,7 +150,7 @@ public class VideoPlayer {
                             return;
                         }
 
-                        // sync getVideos with audio
+                        // sync video with audio
                         long preDelayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
                         if (preDelayMicros < 0) return; // we're behind! skip the frame.
 
@@ -156,19 +163,33 @@ public class VideoPlayer {
                                 return;
                             }
 
-                            // sync getVideos with audio
+                            // sync video with audio
                             long delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
                             if (delayMicros < 0) return; // we're behind! skip the frame.
 
                             // recalculate delta
                             delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
-                            // if getVideos is faster than audio
+                            // if video is faster than audio
                             if (delayMicros > 0) {
-                                // wait for audio to catch up with the getVideos
+                                // wait for audio to catch up with the video
                                 try {
                                     Thread.sleep(TimeUnit.MICROSECONDS.toMillis(delayMicros));
                                 } catch (InterruptedException e) {
                                     throw new RuntimeException(e);
+                                }
+                            }
+
+                            // if paused
+                            if (paused) {
+                                synchronized (this) {
+                                    try {
+                                        wait();
+                                    } catch (InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                                if (!running) {
+                                    return;
                                 }
                             }
 
