@@ -213,6 +213,20 @@ public class VideoPlayer {
                     }
 
                     audioExecutor.submit(() -> {
+
+                        if (paused) {
+                            synchronized (this) {
+                                try {
+                                    wait();
+                                } catch (InterruptedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                            if (!running) {
+                                return;
+                            }
+                        }
+
                         audioLine.write(outBuffer.array(), 0, outBuffer.capacity());
                         outBuffer.clear();
                     });
