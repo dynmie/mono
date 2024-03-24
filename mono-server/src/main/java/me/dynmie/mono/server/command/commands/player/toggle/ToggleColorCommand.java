@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class ToggleColorCommand extends BaseCommand {
     public ToggleColorCommand() {
-        super(List.of("togglecolor"));
+        super(List.of("togglecolor", "tc"));
 
         setDescription("Get the player to toggle the color state");
         setUsage("<client>");

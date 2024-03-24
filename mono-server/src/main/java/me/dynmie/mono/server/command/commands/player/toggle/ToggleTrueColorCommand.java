@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class ToggleTrueColorCommand extends BaseCommand {
     public ToggleTrueColorCommand() {
-        super(List.of("togglefullpixel"));
+        super(List.of("togglefullpixel", "tfp"));
 
         setDescription("Get the player to toggle the full pixel state");
         setUsage("<client>");

@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class ToggleTextDitheringCommand extends BaseCommand {
     public ToggleTextDitheringCommand() {
-        super(List.of("toggletextdithering"));
+        super(List.of("toggletextdithering", "ttd"));
 
         setDescription("Get the player to toggle the text dithering state");
         setUsage("<client>");
