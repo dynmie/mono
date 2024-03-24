@@ -81,7 +81,7 @@ public class PlayerHandler {
                 config.isColor(),
                 config.isFullPixel(),
                 config.isTextDithering(),
-                Asciifier.DEFAULT_BRIGHTNESS_LEVELS
+                brightnessLevels(config.isColor())
         ));
         player.start();
     }
@@ -104,6 +104,11 @@ public class PlayerHandler {
         }
     }
 
+    private char[] brightnessLevels(boolean color) {
+        if (color) return Asciifier.DEFAULT_COLOR_BRIGHTNESS_LEVELS;
+        return Asciifier.DEFAULT_BRIGHTNESS_LEVELS;
+    }
+
     public void setConfig(PlayerConfig config) {
         PlayerConfig playerConfig = this.config;
         this.config = config;
@@ -113,7 +118,7 @@ public class PlayerHandler {
                             config.isColor(),
                             config.isFullPixel(),
                             config.isTextDithering(),
-                            Asciifier.DEFAULT_BRIGHTNESS_LEVELS
+                            brightnessLevels(config.isColor())
                     )
             );
 

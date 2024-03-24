@@ -12,14 +12,17 @@ import java.util.stream.IntStream;
  */
 @AllArgsConstructor
 public class Asciifier {
-    public static final float DITHER_FACTOR = 0.0625f;
-    public static final int DITHER_NEIGHBOR_RIGHT_FACTOR = 7;
-    public static final int DITHER_NEIGHBOR_BOTTOM_LEFT_FACTOR = 3;
-    public static final int DITHER_NEIGHBOR_BOTTOM_FACTOR = 5;
-    public static final int DITHER_NEIGHBOR_BOTTOM_RIGHT_FACTOR = 1;
-    public static final int COLOR_BATCHING_THRESHOLD = 2;
+    private static final float DITHER_FACTOR = 0.0625f;
+    private static final int DITHER_NEIGHBOR_RIGHT_FACTOR = 7;
+    private static final int DITHER_NEIGHBOR_BOTTOM_LEFT_FACTOR = 3;
+    private static final int DITHER_NEIGHBOR_BOTTOM_FACTOR = 5;
+    private static final int DITHER_NEIGHBOR_BOTTOM_RIGHT_FACTOR = 1;
+    private static final int COLOR_BATCHING_THRESHOLD = 2;
 
-    public static final char[] DEFAULT_BRIGHTNESS_LEVELS = " .-+*wGHM#&%".toCharArray();
+    //    public static final char[] DEFAULT_BRIGHTNESS_LEVELS = " .-+*wGHM#&%".toCharArray();
+    public static final char[] DEFAULT_COLOR_BRIGHTNESS_LEVELS = " `.-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@"
+            .toCharArray();
+    public static final char[] DEFAULT_BRIGHTNESS_LEVELS = " .:-=+*#%@".toCharArray();
 
     private final boolean color;
     private final boolean fullPixel;
