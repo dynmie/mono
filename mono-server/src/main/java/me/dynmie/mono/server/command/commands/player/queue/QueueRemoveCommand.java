@@ -37,7 +37,7 @@ public class QueueRemoveCommand extends BaseCommand {
         }
         index = index - 1;
 
-        if (index < 0 || index > queue.size()) {
+        if (index < 0 || index >= queue.size()) {
             context.sendMessage("That video doesn't exist.");
             return CommandResult.OK;
         }
