@@ -13,6 +13,15 @@
 ### What doesn't work
 - Instantaneous config editing
 
+### Gallery
+![Dithering enabled](https://github.com/dynmie/mono/assets/41315732/d76726b8-bb91-4900-bc21-e0a41003a3fb)
+
+Hollow Hunger - Ironmouse @ 2:50 with dithering enabled
+
+![Dithering disabled](https://github.com/dynmie/mono/assets/41315732/6f0c1e5f-deff-4812-a7c7-9d25dbd5dda8)
+
+Hollow Hunger - Ironmouse @ 2:50 with dithering disabled
+
 # Getting started
 ### Prerequisites
 - [Java 21 JRE](https://adoptium.net/temurin/releases/?version=21)
