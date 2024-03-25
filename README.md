@@ -1,4 +1,4 @@
-[![Mono](https://socialify.git.ci/dynmie/mono/image?description=1&forks=1&issues=1&language=1&name=1&owner=1&pulls=1&stargazers=1&theme=Light)](https://github.com/dynmie/AOCBot)
+[![Mono](https://socialify.git.ci/dynmie/mono/image?description=1&forks=1&issues=1&language=1&name=1&owner=1&pulls=1&stargazers=1&theme=Light)](https://github.com/dynmie/mono)
 <div align="center"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/dynmie/mono?style=for-the-badge"> <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/dynmie/mono/gradle.yml?branch=master&logo=github&style=for-the-badge"></div>
 
 ### Notable features
@@ -53,7 +53,7 @@ java -jar client.jar
 
 ## Building
 ### Prerequisites
-- [Java 17 JDK](https://adoptium.net/temurin/releases/?version=17)
+- [Java 21 JDK](https://adoptium.net/temurin/releases/?version=21)
 - [Git](https://git-scm.com/downloads)
 
 ### Cloning the GitHub repository
