@@ -66,7 +66,7 @@ public class Asciifier {
 
         float brightness = RGBUtils.getBrightness(red, green, blue); // percentage
 
-        if (textDithering && !fullPixel) {
+        if (textDithering && !(fullPixel && color)) {
             float thisError = textDitheringErrors[x][y];
 
             brightness += thisError;
