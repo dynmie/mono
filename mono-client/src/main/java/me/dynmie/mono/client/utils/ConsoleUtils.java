@@ -19,11 +19,11 @@ public class ConsoleUtils {
     }
 
     public static void resetCursorPosition() {
-        setCursorPosition(0, 0);
+        setCursorPosition(1, 1);
     }
 
     public static String getResetCursorPositionEscapeCode() {
-        return getCursorPositionEscapeCode(0, 0);
+        return getCursorPositionEscapeCode(1, 1);
     }
 
     public static String getForegroundResetCode() {

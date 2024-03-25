@@ -19,6 +19,7 @@ import java.nio.ShortBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author dynmie
@@ -27,9 +28,9 @@ public class VideoPlayer {
 
     private final OutputStream outputStream;
     private final File source;
-    private volatile @Getter @Setter Asciifier asciifier;
     private volatile @Getter int width;
     private volatile @Getter int height;
+    private volatile @Getter @Setter Asciifier asciifier;
 
     private volatile @Getter boolean running = false;
     private volatile @Getter boolean paused = false;
@@ -110,6 +111,8 @@ public class VideoPlayer {
 
             long lastTimestamp = -1L;
 
+            AtomicInteger atomicQueueSize = new AtomicInteger(0);
+
             while (!Thread.interrupted() && running) {
                 synchronized (this) {
                     while (paused) {
@@ -158,14 +161,17 @@ public class VideoPlayer {
                         imageFrame.close();
                         String text = ConsoleUtils.getResetCursorPositionEscapeCode() + asciifier.createFrame(image);
 
+                        atomicQueueSize.incrementAndGet();
                         imageExecutor.submit(() -> {
+                            int queueSize = atomicQueueSize.getAndDecrement();
+
                             if (width != imageFrame.imageWidth || height != imageFrame.imageHeight) {
                                 return;
                             }
 
                             // sync video with audio
                             long delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
-                            if (delayMicros < 0) return; // we're behind! skip the frame.
+                            if (delayMicros < 0 && queueSize > 1) return; // we're behind! skip the frame.
 
                             // recalculate delta
                             delayMicros = imageFrame.timestamp - playbackTimer.elapsedMicros();
@@ -240,15 +246,15 @@ public class VideoPlayer {
                 }
             }
 
-            audioExecutor.shutdownNow();
+            audioExecutor.shutdown();
             audioExecutor.awaitTermination(10, TimeUnit.SECONDS);
             audioExecutor.close();
 
-            renderingExecutor.shutdownNow();
+            renderingExecutor.shutdown();
             renderingExecutor.awaitTermination(10, TimeUnit.SECONDS);
             renderingExecutor.close();
 
-            imageExecutor.shutdownNow();
+            imageExecutor.shutdown();
             imageExecutor.awaitTermination(10, TimeUnit.SECONDS);
             imageExecutor.close();
 

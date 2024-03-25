@@ -44,28 +44,44 @@ public class Asciifier {
                     for (int x = 0; x < width; x++) {
                         int currentColor = image.getRGB(x, y);
 
-                        int red   = (currentColor >>> 16) & 0xFF;
-                        int green = (currentColor >>>  8) & 0xFF;
-                        int blue  = (currentColor       ) & 0xFF;
+                        boolean almostSameColor = isAlmostSameColor(currentColor, prevColor);
 
-                        float brightness = RGBUtils.getBrightness(red, green, blue); // percentage
+                        String pixel = createPixel(width, height, x, y, currentColor, almostSameColor, textDitheringErrors);
+                        builder.append(pixel);
 
-                        if (textDithering && !fullPixel) {
-                            float thisError = textDitheringErrors[x][y];
-
-                            brightness += thisError;
-
-                            float perceivedBrightness = (float) indexFromBrightness(brightness) / (brightnessLevels.length - 1);
-                            float error = (brightness - perceivedBrightness) * DITHER_FACTOR;
-
-                            writeDitheringError(width, height, x, y, error, textDitheringErrors);
-
-                            brightness = Math.clamp(brightness, 0, 1); // min 0, max 1
+                        if (!almostSameColor) {
+                            prevColor = currentColor;
                         }
+                    }
 
-                        if (color) {
-                            // some optimizations
-                            if (x == 0 || !isAlmostSameColor(currentColor, prevColor)) {
+                    lines[y] = builder.toString();
+                });
+        return String.join("\n", lines);
+    }
+
+    private String createPixel(int width, int height, int x, int y, int currentColor, boolean almostSameColor, float[][] textDitheringErrors) {
+        int red   = (currentColor >>> 16) & 0xFF;
+        int green = (currentColor >>>  8) & 0xFF;
+        int blue  = (currentColor       ) & 0xFF;
+
+        float brightness = RGBUtils.getBrightness(red, green, blue); // percentage
+
+        if (textDithering && !fullPixel) {
+            float thisError = textDitheringErrors[x][y];
+
+            brightness += thisError;
+
+            float perceivedBrightness = (float) indexFromBrightness(brightness) / (brightnessLevels.length - 1);
+            float error = (brightness - perceivedBrightness) * DITHER_FACTOR;
+
+            writeDitheringError(width, height, x, y, error, textDitheringErrors);
+
+            brightness = Math.clamp(brightness, 0, 1); // min 0, max 1
+        }
+
+        if (color) {
+            // some optimizations
+            if (x == 0 || !almostSameColor) {
 //                                if (!fullPixel) {
 //                                    int maxComponent = Math.max(red, Math.max(green, blue));
 //
@@ -78,30 +94,24 @@ public class Asciifier {
 //                                    blue = (int) (blue * scaleFactor);
 //                                }
 
-                                char brightnessChar = getRGBBrightnessCharFromColor(brightness);
+                char brightnessChar = getRGBBrightnessCharFromColor(brightness);
 
-                                String ret;
-                                if (brightnessChar == ' ' && !fullPixel) {
-                                    ret =  " ";
-                                } else if (fullPixel) {
-                                    ret = ConsoleUtils.getBackgroundColorEscapeCode(red, green, blue) + brightnessChar;
-                                } else {
-                                    ret = ConsoleUtils.getForegroundColorEscapeCode(red, green, blue) + brightnessChar;
-                                }
+                String ret;
+                if (brightnessChar == ' ' && !fullPixel) {
+                    ret =  " ";
+                } else if (fullPixel) {
+                    ret = ConsoleUtils.getBackgroundColorEscapeCode(red, green, blue) + brightnessChar;
+                } else {
+                    ret = ConsoleUtils.getForegroundColorEscapeCode(red, green, blue) + brightnessChar;
+                }
 
-                                builder.append(ret);
-                                prevColor = currentColor;
-                            } else {
-                                builder.append(getRGBBrightnessCharFromColor(brightness));
-                            }
-                        } else {
-                            builder.append(getBrightnessCharFromColor(brightness));
-                        }
-                    }
-
-                    lines[y] = builder.toString();
-                });
-        return String.join("\n", lines);
+                return ret;
+            } else {
+                return getRGBBrightnessCharFromColor(brightness) + "";
+            }
+        } else {
+            return getBrightnessCharFromColor(brightness) + "";
+        }
     }
 
     private int indexFromBrightness(float brightness) {
