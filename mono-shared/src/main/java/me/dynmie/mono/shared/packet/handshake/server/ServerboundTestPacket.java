@@ -8,7 +8,7 @@ import me.dynmie.mono.shared.packet.handshake.ServerboundHandshakePacketHandler;
  * @author dynmie
  */
 @Getter
-public class ServerboundTestPacket extends Packet<ServerboundHandshakePacketHandler> {
+public class ServerboundTestPacket implements Packet<ServerboundHandshakePacketHandler> {
     private final String string;
 
     public ServerboundTestPacket(String string) {

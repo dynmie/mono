@@ -6,7 +6,7 @@ import me.dynmie.mono.shared.packet.handshake.ClientboundHandshakePacketHandler;
 /**
  * @author dynmie
  */
-public class ClientboundHandshakeResponsePacket extends Packet<ClientboundHandshakePacketHandler> {
+public class ClientboundHandshakeResponsePacket implements Packet<ClientboundHandshakePacketHandler> {
     @Override
     public void handle(ClientboundHandshakePacketHandler handler) {
         handler.onHandshakeResponse(this);

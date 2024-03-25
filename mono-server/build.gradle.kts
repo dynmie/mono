@@ -18,11 +18,12 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
 
     implementation("com.google.code.gson:gson:2.10.1")
-    implementation("com.github.dynmie:jeorge:1.2.0")
+    implementation("com.github.dynmie:jeorge:1.2.1")
     implementation("io.netty:netty-all:4.1.107.Final")
     implementation("org.jline:jline-terminal-jni:3.25.1")
     implementation("org.jline:jline-reader:3.25.1")
     implementation(project(":mono-shared"))
+    implementation("com.github.sealedtx:java-youtube-downloader:3.2.3")
 
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")

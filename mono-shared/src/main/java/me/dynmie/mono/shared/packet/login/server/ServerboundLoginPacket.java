@@ -10,7 +10,7 @@ import me.dynmie.mono.shared.packet.login.ServerboundLoginPacketHandler;
  */
 @Getter
 @AllArgsConstructor
-public class ServerboundLoginPacket extends Packet<ServerboundLoginPacketHandler> {
+public class ServerboundLoginPacket implements Packet<ServerboundLoginPacketHandler> {
     private final String token;
 
     @Override

@@ -6,14 +6,19 @@ import me.dynmie.mono.server.client.RemoteClient;
 import me.dynmie.mono.server.client.session.SessionHandler;
 import me.dynmie.mono.server.data.ServerConfig;
 import me.dynmie.mono.server.network.connection.ClientConnection;
+import me.dynmie.mono.server.player.VideoHandler;
 import me.dynmie.mono.shared.packet.ConnectionState;
 import me.dynmie.mono.shared.packet.login.ServerboundLoginPacketHandler;
 import me.dynmie.mono.shared.packet.login.client.ClientboundLoginFailedPacket;
 import me.dynmie.mono.shared.packet.login.client.ClientboundLoginResponsePacket;
 import me.dynmie.mono.shared.packet.login.server.ServerboundLoginPacket;
+import me.dynmie.mono.shared.packet.ready.client.ClientboundPlayerPlaylistUpdatePacket;
+import me.dynmie.mono.shared.player.PlayerPlaylistInfo;
 import me.dynmie.mono.shared.session.ClientSession;
 
+import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -49,10 +54,20 @@ public class DefaultServerboundLoginPacketHandler implements ServerboundLoginPac
 
         SessionHandler sessionHandler = injector.getDependency(SessionHandler.class);
         ClientHandler clientHandler = injector.getDependency(ClientHandler.class);
+        VideoHandler videoHandler = injector.getDependency(VideoHandler.class);
 
-        // TODO
         String clientName = "default";
         UUID uniqueId = UUID.randomUUID();
+
+        if (clientHandler.getClient(clientName) != null) {
+            String string = uniqueId.toString();
+            clientName = string.substring(string.length() - 4);
+
+            // name collisions lmao
+            if (clientHandler.getClient(clientName) != null) {
+                clientName = string;
+            }
+        }
 
         ClientSession session = new ClientSession(clientName, uniqueId);
         sessionHandler.addSession(connection.getChannel(), session);
@@ -66,20 +81,31 @@ public class DefaultServerboundLoginPacketHandler implements ServerboundLoginPac
             return;
         }
 
-        RemoteClient client = new RemoteClient(session, connection);
+        RemoteClient client = new RemoteClient(
+                session,
+                connection,
+                new ArrayList<>(videoHandler.generateDefaultPlaylistInfo().getVideos())
+        );
         clientHandler.addClient(client);
 
-        connection.sendPacket(new ClientboundLoginResponsePacket(session));
+        // wierd fix, apparently netty doesn't run future listeners for some reason
+        // can't seem to find a solution so i did this instead
+        Thread.startVirtualThread(() -> {
+            connection.sendPacket(new ClientboundLoginResponsePacket(session))
+                    .awaitUninterruptibly(2, TimeUnit.MILLISECONDS);
 
-        connection.setPacketHandler(new DefaultServerboundReadyPacketHandler(injector, connection));
-        connection.setConnectionState(ConnectionState.READY);
+            connection.setPacketHandler(new DefaultServerboundReadyPacketHandler(injector, client, connection));
+            connection.setConnectionState(ConnectionState.READY);
 
+            connection.sendPacket(new ClientboundPlayerPlaylistUpdatePacket(
+                    new PlayerPlaylistInfo(client.getQueue())
+            ));
 
-        logger.info("Client %s[%s](%s) has successfully logged in!".formatted(
-                session.getName(),
-                session.getUniqueId(),
-                connection.getChannel().remoteAddress()
-        ));
-
+            logger.info("Client %s[%s](%s) has successfully logged in!".formatted(
+                    session.getName(),
+                    session.getUniqueId(),
+                    connection.getChannel().remoteAddress()
+            ));
+        });
     }
 }

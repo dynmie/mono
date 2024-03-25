@@ -1,7 +1,5 @@
-package me.dynmie.mono.shared.packet.store;
+package me.dynmie.mono.shared.packet;
 
-import me.dynmie.mono.shared.packet.Packet;
-import me.dynmie.mono.shared.packet.PacketHandler;
 import me.dynmie.mono.shared.store.Store;
 
 /**

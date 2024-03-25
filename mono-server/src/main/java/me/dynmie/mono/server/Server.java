@@ -5,11 +5,16 @@ import me.dynmie.jeorge.Injector;
 import me.dynmie.jeorge.Jeorge;
 import me.dynmie.mono.server.client.ClientHandler;
 import me.dynmie.mono.server.client.session.SessionHandler;
+import me.dynmie.mono.server.command.handler.CommandHandler;
+import me.dynmie.mono.server.command.server.CommandRegistrationHandler;
+import me.dynmie.mono.server.command.server.ServerCommandHandlerConfiguration;
+import me.dynmie.mono.server.console.ServerConsoleHandler;
 import me.dynmie.mono.server.data.ServerConfig;
 import me.dynmie.mono.server.data.ServerConfigHandler;
 import me.dynmie.mono.server.jeorge.ServerBinder;
 import me.dynmie.mono.server.network.connection.ConnectionHandler;
 import me.dynmie.mono.server.network.netty.NetworkHandler;
+import me.dynmie.mono.server.player.VideoHandler;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
@@ -29,7 +34,7 @@ import java.util.logging.SimpleFormatter;
 public class Server {
 
     private final @Getter Logger logger = Logger.getLogger("Server");
-    private final @Getter File workingFolder = new File("mono", "server");
+    private final @Getter File workingFolder = new File("mono-data", "server");
     private final @Getter Terminal terminal;
     private final @Getter LineReader lineReader;
 
@@ -74,11 +79,35 @@ public class Server {
 
         networkHandler = new NetworkHandler(logger, config.getNetworkInformation(), connectionHandler, sessionHandler, clientHandler);
 
-        injector = Jeorge.createInjector(new ServerBinder(this, logger, sessionHandler, connectionHandler, clientHandler, networkHandler, config));
+        VideoHandler videoHandler = new VideoHandler(config.getPlayerConfiguration(), logger);
+        videoHandler.initialize();
+
+        ServerCommandHandlerConfiguration commandHandlerConfig = new ServerCommandHandlerConfiguration(
+                clientHandler
+        );
+        CommandHandler commandHandler = new CommandHandler(commandHandlerConfig, logger);
+
+        injector = Jeorge.createInjector(new ServerBinder(
+                this,
+                logger,
+                sessionHandler,
+                connectionHandler,
+                clientHandler,
+                networkHandler,
+                videoHandler,
+                commandHandler,
+                config
+        ));
+
+        CommandRegistrationHandler commandRegistrationHandler = new CommandRegistrationHandler(injector, commandHandler);
+        commandRegistrationHandler.initialize();
+
+        ServerConsoleHandler serverConsoleHandler = new ServerConsoleHandler(this, lineReader, commandHandler);
 
         networkHandler.start();
 
-        logger.info("Welcome to the server!");
+        logger.info("Welcome to Mono!");
+        serverConsoleHandler.initialize();
     }
 
     public void shutdown() {

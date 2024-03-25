@@ -1,6 +1,6 @@
-/mono/
 .gradle
 build/
+/mono-data/
 .idea/
 !gradle/wrapper/gradle-wrapper.jar
 !**/**/src/main/**/build/

@@ -14,6 +14,7 @@ public class ServerConfig {
 
     private final NetworkInformation networkInformation = new NetworkInformation();
     private final LoginCredentials loginCredentials = new LoginCredentials();
+    private final PlayerConfiguration playerConfiguration = new PlayerConfiguration();
 
     @Getter
     @Setter
@@ -34,6 +35,12 @@ public class ServerConfig {
     @Setter
     public static class LoginCredentials {
         private String token = "poggers";
+    }
+
+    @Getter
+    @Setter
+    public static class PlayerConfiguration {
+        private String defaultPlaylistId = "enter_playlist_id_here";
     }
 
 }

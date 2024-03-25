@@ -18,11 +18,9 @@ public class SerializableEncoder extends ChannelOutboundHandlerAdapter {
             super.write(ctx, msg, promise);
             return;
         }
-        ByteBuf byteBuf = ctx.alloc().buffer();
-
         byte[] bytes = SerializationUtils.serialize(serializable);
+        ByteBuf byteBuf = ctx.alloc().buffer(bytes.length);
         byteBuf.writeBytes(bytes);
-
         ctx.write(byteBuf);
     }
 }

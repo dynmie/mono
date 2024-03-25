@@ -7,6 +7,7 @@ import me.dynmie.mono.client.data.ClientConfig;
 import me.dynmie.mono.client.data.ClientConfigHandler;
 import me.dynmie.mono.client.network.NetworkHandler;
 import me.dynmie.mono.client.player.PlayerHandler;
+import me.dynmie.mono.client.player.QueueHandler;
 
 import java.util.logging.Logger;
 
@@ -19,6 +20,7 @@ public class ClientBinder extends Binder {
     private final NetworkHandler networkHandler;
     private final ClientConfigHandler configHandler;
     private final PlayerHandler playerHandler;
+    private final QueueHandler queueHandler;
     private final ClientConfig config;
 
     @Override
@@ -28,6 +30,7 @@ public class ClientBinder extends Binder {
         bind(NetworkHandler.class, networkHandler);
         bind(ClientConfigHandler.class, configHandler);
         bind(PlayerHandler.class, playerHandler);
+        bind(QueueHandler.class, queueHandler);
         bind(ClientConfig.class, config);
     }
 }

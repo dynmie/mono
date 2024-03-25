@@ -5,9 +5,11 @@ import me.dynmie.jeorge.Binder;
 import me.dynmie.mono.server.Server;
 import me.dynmie.mono.server.client.ClientHandler;
 import me.dynmie.mono.server.client.session.SessionHandler;
+import me.dynmie.mono.server.command.handler.CommandHandler;
 import me.dynmie.mono.server.data.ServerConfig;
 import me.dynmie.mono.server.network.connection.ConnectionHandler;
 import me.dynmie.mono.server.network.netty.NetworkHandler;
+import me.dynmie.mono.server.player.VideoHandler;
 
 import java.util.logging.Logger;
 
@@ -23,6 +25,8 @@ public class ServerBinder extends Binder {
     private final ConnectionHandler connectionHandler;
     private final ClientHandler clientHandler;
     private final NetworkHandler networkHandler;
+    private final VideoHandler videoHandler;
+    private final CommandHandler commandHandler;
     private final ServerConfig config;
 
     @Override
@@ -33,6 +37,8 @@ public class ServerBinder extends Binder {
         bind(ConnectionHandler.class, connectionHandler);
         bind(ClientHandler.class, clientHandler);
         bind(NetworkHandler.class, networkHandler);
+        bind(VideoHandler.class, videoHandler);
+        bind(CommandHandler.class, commandHandler);
         bind(ServerConfig.class, config);
     }
 
