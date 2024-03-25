@@ -8,6 +8,7 @@
 - Default playlist queue system 
 - Custom video queue system 
 - Floyd-Steinberg text dithering 
+- Auto resizing terminal window
 
 ### What doesn't work
 - Instantaneous config editing

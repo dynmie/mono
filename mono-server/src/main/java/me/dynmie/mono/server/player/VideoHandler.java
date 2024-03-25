@@ -29,11 +29,16 @@ public class VideoHandler {
     private final ServerConfig.PlayerConfiguration configuration;
     private final Logger logger;
     private final YoutubeDownloader downloader = new YoutubeDownloader();
-    private List<PlayerVideoInfo> infos;
+    private List<PlayerVideoInfo> infos = new ArrayList<>();
 
     @SneakyThrows
     public void initialize() {
         String playlistId = configuration.getDefaultPlaylistId();
+        if (playlistId.isEmpty() || playlistId.isBlank()) {
+            logger.info("No playlist loaded.");
+            return;
+        }
+
         logger.info("Loading playlist '" + playlistId + "'...");
         RequestPlaylistInfo request = new RequestPlaylistInfo(playlistId);
         Response<PlaylistInfo> response = downloader.getPlaylistInfo(request);
