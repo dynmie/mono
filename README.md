@@ -13,7 +13,7 @@
 ### What doesn't work
 - Instantaneous config editing
 
-### Gallery
+# Gallery
 ![ascii enabled dithering](https://github.com/dynmie/mono/assets/41315732/51b9a510-a97f-4c0a-b344-5c4f75b9cce2)
 
 Hollow Hunger - Ironmouse @ 1:05 with dithering enabled
