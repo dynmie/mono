@@ -20,7 +20,7 @@ Hollow Hunger - Ironmouse @ 1:05 with dithering enabled
 
 ![dithering off ascii](https://github.com/dynmie/mono/assets/41315732/783d6f8e-5ec0-4f87-93a5-20054b42cae6)
 
-Hollow Hunger - Ironmouse @ 1:05 with dithering enabled
+Hollow Hunger - Ironmouse @ 1:05 with dithering disabled
 
 ![Dithering enabled](https://github.com/dynmie/mono/assets/41315732/d76726b8-bb91-4900-bc21-e0a41003a3fb)
 
