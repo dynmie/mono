@@ -8,27 +8,27 @@
 - Default playlist queue system 
 - Custom video queue system 
 - Floyd-Steinberg text dithering 
-- Auto resizing terminal window
+- Auto resizing playback window
 
 ### What doesn't work
 - Instantaneous config editing
 
 # Gallery
-![ascii enabled dithering](https://github.com/dynmie/mono/assets/41315732/51b9a510-a97f-4c0a-b344-5c4f75b9cce2)
+![Hollow hunger with dithering enabled](https://github.com/dynmie/monolizer-java/assets/41315732/9e8d1453-c681-4b1e-9a21-8b78b76adb49)
 
 Hollow Hunger - Ironmouse @ 1:05 with dithering enabled
 
-![dithering off ascii](https://github.com/dynmie/mono/assets/41315732/783d6f8e-5ec0-4f87-93a5-20054b42cae6)
+![Hollow hunger with dithering disabled](https://github.com/dynmie/monolizer-java/assets/41315732/e3c24557-5e17-46d7-8cf7-b9a9348cf80c)
 
 Hollow Hunger - Ironmouse @ 1:05 with dithering disabled
 
-![Dithering enabled](https://github.com/dynmie/mono/assets/41315732/d76726b8-bb91-4900-bc21-e0a41003a3fb)
+![Dithering enabled](https://github.com/dynmie/monolizer-java/assets/41315732/016ee90d-72f4-485b-8213-3624020f743b)
 
 Hollow Hunger - Ironmouse @ 2:50 with dithering enabled
 
-![Dithering disabled](https://github.com/dynmie/mono/assets/41315732/6f0c1e5f-deff-4812-a7c7-9d25dbd5dda8)
+![full pixel](https://github.com/dynmie/monolizer-java/assets/41315732/213d43ac-94cf-4e7b-ab7e-0c0b365b3f0b)
 
-Hollow Hunger - Ironmouse @ 2:50 with dithering disabled
+Telecaster b boy (long ver.) - Kanata Amane @ 0:26 with full pixel and color enabled
 
 # Getting started
 ### Prerequisites
