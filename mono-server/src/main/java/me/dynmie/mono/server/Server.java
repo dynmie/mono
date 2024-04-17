@@ -20,8 +20,9 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.LogRecord;
@@ -34,7 +35,7 @@ import java.util.logging.SimpleFormatter;
 public class Server {
 
     private final @Getter Logger logger = Logger.getLogger("Server");
-    private final @Getter File workingFolder = new File("mono-data", "server");
+    private final @Getter Path workingFolderPath = Paths.get("mono-data", "server");
     private final @Getter Terminal terminal;
     private final @Getter LineReader lineReader;
 
@@ -43,6 +44,7 @@ public class Server {
     private @Getter Injector injector;
 
     {
+        // Logger setup
         logger.setUseParentHandlers(false);
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(new SimpleFormatter() {
@@ -56,6 +58,7 @@ public class Server {
         });
         logger.addHandler(handler);
 
+        // Terminal setup
         try {
             terminal = TerminalBuilder.builder().dumb(true).build();
             lineReader = LineReaderBuilder.builder()
@@ -66,10 +69,13 @@ public class Server {
         }
     }
 
+    /**
+     * Starts the server.
+     */
     public void start() {
         logger.info("Starting server...");
 
-        ServerConfigHandler configHandler = new ServerConfigHandler(new File(workingFolder, "config.json"));
+        ServerConfigHandler configHandler = new ServerConfigHandler(workingFolderPath.resolve("config.json"));
         configHandler.initialize();
         ServerConfig config = configHandler.retrieveConfig();
 
@@ -110,6 +116,9 @@ public class Server {
         serverConsoleHandler.initialize();
     }
 
+    /**
+     * Initiates the shutdown sequence of the server.
+     */
     public void shutdown() {
         logger.info("Shutting down...");
         networkHandler.shutdown();

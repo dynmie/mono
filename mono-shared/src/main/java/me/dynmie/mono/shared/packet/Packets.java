@@ -5,6 +5,10 @@ import com.google.gson.Gson;
 import java.util.Objects;
 
 /**
+ * A simple utility class to help with packet management.
+ *
+ * @see Packet
+ * @see RawPacket
  * @author dynmie
  */
 public final class Packets {
@@ -12,6 +16,16 @@ public final class Packets {
 
     private Packets() { throw new IllegalStateException("why did you instantiate me bruh"); }
 
+    /**
+     * Serializes a Packet into a transmittable RawPacket.
+     *
+     * @see Packet
+     * @see RawPacket
+     * @param state the current connection state
+     * @param direction the direction the packet is travelling
+     * @param packet the packet to serialize
+     * @return the transmittable RawPacket
+     */
     @SuppressWarnings("unchecked")
     public static RawPacket toRaw(ConnectionState state, PacketDirection direction, Packet<? extends PacketHandler> packet) {
         Objects.requireNonNull(state, "connectionState cannot be null");
@@ -23,6 +37,16 @@ public final class Packets {
         return new RawPacket(packetId, json);
     }
 
+    /**
+     * Deserializes a RawPacket into a readable Packet.
+     *
+     * @see Packet
+     * @see RawPacket
+     * @param state the current connection state
+     * @param direction the direction the packet is travelling
+     * @param rawPacket the packet to deserialize
+     * @return the readable Packet
+     */
     public static Packet<? extends PacketHandler> fromRaw(ConnectionState state, PacketDirection direction, RawPacket rawPacket) {
         Objects.requireNonNull(state, "connectionState cannot be null");
         Objects.requireNonNull(direction, "packetDirection cannot be null");

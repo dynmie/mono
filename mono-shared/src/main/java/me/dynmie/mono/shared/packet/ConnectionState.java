@@ -1,5 +1,6 @@
 package me.dynmie.mono.shared.packet;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.dynmie.mono.shared.packet.exception.PacketIdNotFoundException;
 import me.dynmie.mono.shared.packet.exception.PacketTypeNotFoundException;
@@ -14,8 +15,12 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * Represents the different states of connection during packet transmission.
+ * Each state holds a set of packet stores for both clientbound and serverbound directions.
+ *
  * @author dynmie
  */
+@AllArgsConstructor
 public enum ConnectionState {
     HANDSHAKE(-1, Map.of(
             PacketDirection.SERVERBOUND, new ServerboundHandshakePacketStore(),
@@ -33,11 +38,14 @@ public enum ConnectionState {
     private final @Getter int protocolId;
     private final Map<PacketDirection, PacketStore> packetStores;
 
-    ConnectionState(int protocolId, Map<PacketDirection, PacketStore> packetStores) {
-        this.protocolId = protocolId;
-        this.packetStores = packetStores;
-    }
-
+    /**
+     * Retrieves the type of packet corresponding to the given packet direction and identifier.
+     *
+     * @param direction the direction the packet is travelling
+     * @param packetId the identifier of the packet
+     * @return the type of packet
+     * @throws PacketTypeNotFoundException if the packet type is not found in the specified direction
+     */
     public Class<? extends Packet<? extends PacketHandler>> getPacketType(PacketDirection direction, int packetId) {
         Objects.requireNonNull(direction, "packetDirection cannot be null");
 
@@ -49,6 +57,14 @@ public enum ConnectionState {
         return clazz;
     }
 
+    /**
+     * Retrieves the identifier of the packet corresponding to the given direction and packet type.
+     *
+     * @param direction the direction the packet is travelling
+     * @param packetType the type of packet
+     * @return the identifier of the packet
+     * @throws PacketIdNotFoundException if the packet identifier is not found for the specified type and direction
+     */
     public int getPacketId(PacketDirection direction, Class<? extends Packet<? extends PacketHandler>> packetType) {
         Objects.requireNonNull(direction, "packetDirection cannot be null");
         Objects.requireNonNull(packetType, "packetType cannot be null");

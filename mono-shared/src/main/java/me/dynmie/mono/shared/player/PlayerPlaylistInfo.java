@@ -1,13 +1,13 @@
 package me.dynmie.mono.shared.player;
 
-import lombok.Data;
+import lombok.Value;
 
 import java.util.List;
 
 /**
  * @author dynmie
  */
-@Data
+@Value
 public class PlayerPlaylistInfo {
-    private final List<PlayerVideoInfo> videos;
+    List<PlayerVideoInfo> videos;
 }

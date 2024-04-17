@@ -13,8 +13,9 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.InfoCmp;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.LogRecord;
@@ -27,7 +28,7 @@ import java.util.logging.SimpleFormatter;
 public class QClient {
 
     private final @Getter Logger logger = Logger.getLogger("Client");
-    private final @Getter File workingFolder = new File("mono-data", "client");
+    private final @Getter Path workingFolderPath = Paths.get("mono-data", "client");
     private final @Getter Terminal terminal;
 
     private NetworkHandler networkHandler;
@@ -35,6 +36,7 @@ public class QClient {
     private @Getter Injector injector;
 
     {
+        // Logger setup
         logger.setUseParentHandlers(false);
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(new SimpleFormatter() {
@@ -48,6 +50,7 @@ public class QClient {
         });
         logger.addHandler(handler);
 
+        // Terminal setup
         try {
             terminal = TerminalBuilder.builder().dumb(true).build();
             terminal.puts(InfoCmp.Capability.cursor_invisible);
@@ -61,8 +64,11 @@ public class QClient {
         }
     }
 
+    /**
+     * Starts the client.
+     */
     public void start() {
-        ClientConfigHandler configHandler = new ClientConfigHandler(new File(workingFolder, "config.json"));
+        ClientConfigHandler configHandler = new ClientConfigHandler(workingFolderPath.resolve("config.json"));
         configHandler.initialize();
         ClientConfig config = configHandler.retrieveConfig();
 
@@ -86,6 +92,9 @@ public class QClient {
         playerHandler.initialize();
     }
 
+    /**
+     * Initiates the shutdown sequence of the client.
+     */
     public void shutdown() {
         logger.info("Shutting down...");
         networkHandler.shutdown();

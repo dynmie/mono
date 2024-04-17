@@ -41,9 +41,8 @@ public class ToggleColorCommand extends BaseCommand {
         if (client == null) {
             return CommandResult.INCORRECT_USAGE;
         }
-        PlayerConfig.Mutable mutable = client.getConfig().toMutable();
-        mutable.setColor(!mutable.isColor());
-        client.setConfig(mutable.toImmutable());
+        PlayerConfig config = client.getConfig();
+        client.setConfig(config.withColor(!config.isColor()));
         return CommandResult.OK;
     }
 }

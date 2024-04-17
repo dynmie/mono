@@ -41,9 +41,8 @@ public class ToggleTrueColorCommand extends BaseCommand {
         if (client == null) {
             return CommandResult.INCORRECT_USAGE;
         }
-        PlayerConfig.Mutable mutable = client.getConfig().toMutable();
-        mutable.setFullPixel(!mutable.isFullPixel());
-        client.setConfig(mutable.toImmutable());
+        PlayerConfig config = client.getConfig();
+        client.setConfig(config.withFullPixel(!config.isFullPixel()));
         return CommandResult.OK;
     }
 }

@@ -2,13 +2,13 @@ package me.dynmie.mono.client.data;
 
 import me.dynmie.mono.shared.data.ConfigHandler;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * @author dynmie
  */
 public class ClientConfigHandler extends ConfigHandler<ClientConfig> {
-    public ClientConfigHandler(File file) {
-        super(file);
+    public ClientConfigHandler(Path path) {
+        super(path);
     }
 }

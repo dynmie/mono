@@ -12,7 +12,6 @@ public abstract class Store<K, V> {
         configure();
     }
 
-
     private final BiMap<K, V> store = HashBiMap.create();
 
     public V get(K key) {

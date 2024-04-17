@@ -1,18 +1,15 @@
 package me.dynmie.mono.shared.session;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 import java.util.UUID;
 
 /**
  * @author dynmie
  */
-@Getter
-@AllArgsConstructor
+@Value
 public class ClientSession {
-
-    private final String name;
-    private final UUID uniqueId;
-
+    @EqualsAndHashCode.Exclude String name;
+    UUID uniqueId;
 }
