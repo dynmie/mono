@@ -42,7 +42,7 @@ public class QueueHandler {
         this.client = client;
         this.networkHandler = networkHandler;
 
-        this.outputDirectory = new File(client.getWorkingFolder(), "videos");
+        this.outputDirectory = new File(client.getWorkingFolderPath().toFile(), "videos");
     }
 
     public void initialize() {

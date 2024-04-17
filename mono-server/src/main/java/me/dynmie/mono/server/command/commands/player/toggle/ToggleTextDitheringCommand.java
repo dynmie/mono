@@ -41,9 +41,8 @@ public class ToggleTextDitheringCommand extends BaseCommand {
         if (client == null) {
             return CommandResult.INCORRECT_USAGE;
         }
-        PlayerConfig.Mutable mutable = client.getConfig().toMutable();
-        mutable.setTextDithering(!mutable.isTextDithering());
-        client.setConfig(mutable.toImmutable());
+        PlayerConfig config = client.getConfig();
+        client.setConfig(config.withTextDithering(!config.isTextDithering()));
         return CommandResult.OK;
     }
 }

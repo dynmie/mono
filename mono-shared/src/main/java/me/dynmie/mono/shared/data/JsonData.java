@@ -4,16 +4,20 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.Cleanup;
 import lombok.Getter;
+import lombok.SneakyThrows;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.BufferedReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
+ * A utility class for handling JSON data stored in files.
+ *
  * @author dynmie
  */
+@Getter
 public class JsonData {
 
     private static final Gson gson = new GsonBuilder()
@@ -21,51 +25,64 @@ public class JsonData {
             .serializeNulls()
             .create();
 
-    private final @Getter File file;
-    private @Getter JsonObject jsonObject;
+    private final Path path;
+    private JsonObject jsonObject;
 
-    public JsonData(File file, JsonObject jsonObject) {
-        this.file = file;
+    /**
+     * Constructs a JsonData object with the specified file path and JSON object.
+     *
+     * @param path the path to the JSON file
+     * @param jsonObject the JSON object containing the data
+     */
+    public JsonData(Path path, JsonObject jsonObject) {
+        this.path = path;
         this.jsonObject = jsonObject;
     }
 
-    public JsonData(File file) {
-        this.file = file;
+    /**
+     * Constructs a JsonData object with the specified file path and initializes an empty JSON object.
+     *
+     * @param path the path to the JSON file
+     */
+    public JsonData(Path path) {
+        this.path = path;
         this.jsonObject = new JsonObject();
     }
 
+    /**
+     * Loads JSON data from the file into the JSON object.
+     */
+    @SneakyThrows
     public void load() {
-        if (!file.exists()) {
+        if (!Files.exists(path)) {
             return;
         }
 
-        try (FileReader reader = new FileReader(file)) {
-            jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        @Cleanup BufferedReader reader = Files.newBufferedReader(path);
+
+        jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
     }
 
+    /**
+     * Creates the file and its parent directories if they do not exist.
+     */
+    @SneakyThrows
     public void createIfNotExists() {
-        if (file.exists()) {
+        if (Files.exists(path)) {
             return;
         }
-        try {
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to create Json file", e);
-        }
+
+        Files.createDirectories(path.getParent());
+        Files.createFile(path);
     }
 
+    /**
+     * Saves the JSON data to the file.
+     */
+    @SneakyThrows
     public void save() {
         createIfNotExists();
-
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(gson.toJson(jsonObject));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to safe Json file", e);
-        }
+        Files.writeString(path, gson.toJson(jsonObject));
     }
 
 }

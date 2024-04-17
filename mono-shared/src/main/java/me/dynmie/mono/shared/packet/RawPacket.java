@@ -1,19 +1,17 @@
 package me.dynmie.mono.shared.packet;
 
-import lombok.Getter;
+import lombok.Value;
 
 import java.io.Serializable;
 
 /**
+ * A transmittable, immutable packet containing the packet id and the raw JSON data as a string.
+ *
+ * @see Packet
  * @author dynmie
  */
-@Getter
+@Value
 public class RawPacket implements Serializable {
-    private final int id;
-    private final String data;
-
-    public RawPacket(int id, String data) {
-        this.id = id;
-        this.data = data;
-    }
+    int id;
+    String data;
 }

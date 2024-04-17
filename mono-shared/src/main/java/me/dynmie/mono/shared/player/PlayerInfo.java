@@ -1,12 +1,12 @@
 package me.dynmie.mono.shared.player;
 
-import lombok.Data;
+import lombok.Value;
 
 /**
  * @author dynmie
  */
-@Data
+@Value
 public class PlayerInfo {
-    private final PlayerVideoInfo nowPlaying;
-    private final boolean paused;
+    PlayerVideoInfo nowPlaying;
+    boolean paused;
 }
