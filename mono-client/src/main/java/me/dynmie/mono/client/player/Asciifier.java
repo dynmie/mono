@@ -44,7 +44,8 @@ public class Asciifier {
                     for (int x = 0; x < width; x++) {
                         int currentColor = image.getRGB(x, y);
 
-                        boolean almostSameColor = isAlmostSameColor(currentColor, prevColor);
+                        boolean almostSameColor = true; // broken, needs to be fixed
+                        //isAlmostSameColor(currentColor, prevColor);
 
                         String pixel = createPixel(width, height, x, y, currentColor, almostSameColor, textDitheringErrors);
                         builder.append(pixel);
@@ -72,7 +73,7 @@ public class Asciifier {
             brightness += thisError;
 
             float perceivedBrightness = (float) indexFromBrightness(brightness) / (brightnessLevels.length - 1);
-            float error = (brightness - perceivedBrightness) * DITHER_FACTOR;
+            float error = (brightness - perceivedBrightness);
 
             writeDitheringError(width, height, x, y, error, textDitheringErrors);
 
@@ -151,16 +152,16 @@ public class Asciifier {
 
     private static void writeDitheringError(int width, int height, int x, int y, float error, float[][] errors) {
         if (x < width - 1) {
-            errors[x + 1][y] += error * DITHER_NEIGHBOR_RIGHT_FACTOR;
+            errors[x + 1][y] += error * DITHER_NEIGHBOR_RIGHT_FACTOR * DITHER_FACTOR;
         }
 
         if (y < height - 1) {
             if (x > 0) {
-                errors[x - 1][y + 1] += error * DITHER_NEIGHBOR_BOTTOM_LEFT_FACTOR;
+                errors[x - 1][y + 1] += error * DITHER_NEIGHBOR_BOTTOM_LEFT_FACTOR * DITHER_FACTOR;
             }
-            errors[x][y + 1] += error * DITHER_NEIGHBOR_BOTTOM_FACTOR;
+            errors[x][y + 1] += error * DITHER_NEIGHBOR_BOTTOM_FACTOR * DITHER_FACTOR;
             if (x < width - 1) {
-                errors[x + 1][y + 1] += error * DITHER_NEIGHBOR_BOTTOM_RIGHT_FACTOR;
+                errors[x + 1][y + 1] += error * DITHER_NEIGHBOR_BOTTOM_RIGHT_FACTOR * DITHER_FACTOR;
             }
         }
     }
