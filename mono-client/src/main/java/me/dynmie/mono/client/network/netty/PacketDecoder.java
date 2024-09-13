@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import me.dynmie.mono.client.network.NetworkHandler;
 import me.dynmie.mono.client.network.connection.ServerConnection;
 import me.dynmie.mono.shared.packet.*;
-import me.dynmie.mono.shared.utils.SerializationUtils;
+import me.dynmie.mono.shared.util.SerializationUtils;
 
 /**
  * @author dynmie

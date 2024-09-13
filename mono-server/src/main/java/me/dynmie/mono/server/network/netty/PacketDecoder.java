@@ -12,7 +12,7 @@ import me.dynmie.mono.server.network.connection.ClientConnection;
 import me.dynmie.mono.server.network.connection.ConnectionHandler;
 import me.dynmie.mono.shared.packet.*;
 import me.dynmie.mono.shared.session.ClientSession;
-import me.dynmie.mono.shared.utils.SerializationUtils;
+import me.dynmie.mono.shared.util.SerializationUtils;
 
 import java.net.SocketException;
 import java.util.logging.Logger;

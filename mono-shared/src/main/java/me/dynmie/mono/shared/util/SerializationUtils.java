@@ -1,4 +1,4 @@
-package me.dynmie.mono.shared.utils;
+package me.dynmie.mono.shared.util;
 
 import java.io.*;
 
