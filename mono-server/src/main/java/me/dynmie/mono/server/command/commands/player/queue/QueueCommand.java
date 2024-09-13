@@ -46,7 +46,7 @@ public class QueueCommand extends BaseCommand {
 
         StringJoiner joiner = new StringJoiner("\n");
         joiner.add("");
-        joiner.add("Queue");
+        joiner.add("Up next");
         for (int i = 0; i < client.getQueue().size(); i++) {
             PlayerVideoInfo info = client.getQueue().get(i);
             joiner.add("%s. %s (%s)".formatted(

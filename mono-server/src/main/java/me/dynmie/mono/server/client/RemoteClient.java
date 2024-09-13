@@ -45,12 +45,13 @@ public class RemoteClient {
     }
 
     public void addToQueue(PlayerVideoInfo videoInfo) {
-        int i;
-        for (i = 0; i < queue.size(); i++) {
+        int i = 0;
+        while (i < queue.size()) {
             PlayerVideoInfo info = queue.get(i);
             if (info.isDefaultPlaylistVideo()) {
                 break;
             }
+            i++;
         }
         queue.add(i, videoInfo);
     }

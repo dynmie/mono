@@ -44,7 +44,7 @@ public class Asciifier {
                     for (int x = 0; x < width; x++) {
                         int currentColor = image.getRGB(x, y);
 
-                        boolean almostSameColor = true; // broken, needs to be fixed
+                        boolean almostSameColor = false; // broken, needs to be fixed
                         //isAlmostSameColor(currentColor, prevColor);
 
                         String pixel = createPixel(width, height, x, y, currentColor, almostSameColor, textDitheringErrors);

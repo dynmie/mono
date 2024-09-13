@@ -6,85 +6,71 @@ import com.github.kiulian.downloader.downloader.request.RequestVideoInfo;
 import com.github.kiulian.downloader.model.videos.VideoInfo;
 import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
 import lombok.Getter;
-import lombok.Setter;
 import me.dynmie.mono.client.QClient;
 import me.dynmie.mono.client.network.NetworkHandler;
+import me.dynmie.mono.client.network.connection.ServerConnection;
+import me.dynmie.mono.shared.packet.ConnectionState;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerPlaylistUpdatePacket;
 import me.dynmie.mono.shared.player.PlayerPlaylistInfo;
 import me.dynmie.mono.shared.player.PlayerVideoInfo;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
  * @author dynmie
  */
-@Setter
-@Getter
 public class QueueHandler {
     private final YoutubeDownloader downloader = new YoutubeDownloader();
 
-    private final QClient client;
     private final NetworkHandler networkHandler;
 
-    private List<PlayerVideoInfo> queue = new ArrayList<>();
-    private ActualVideoInfo nextVideo;
-    private ActualVideoInfo nowPlaying;
-
-    private Thread thread;
-
-    private final File outputDirectory;
+    private final @Getter Queue queue = new Queue();
+    private final @Getter File outputDirectory;
 
     public QueueHandler(QClient client, NetworkHandler networkHandler) {
-        this.client = client;
         this.networkHandler = networkHandler;
 
         this.outputDirectory = new File(client.getWorkingFolderPath().toFile(), "videos");
     }
 
-    public void initialize() {
+    public CompletableFuture<Void> downloadVideo(ProperVideoInfo properInfo) {
+        return CompletableFuture.runAsync(() -> {
+            if (properInfo.isTaskTaken()) return;
+            properInfo.setTaskTaken(true);
 
-    }
+            PlayerVideoInfo playerInfo = properInfo.getInfo();
 
-    public void update(boolean override) {
-        if (nextVideo != null && !override) return;
-        if (thread != null) return;
+            RequestVideoInfo requestVideoInfo = new RequestVideoInfo(playerInfo.getVideoId());
 
-        thread = Thread.startVirtualThread(() -> {
-            if (queue.isEmpty()) {
-                thread = null;
-                return;
-            }
-            PlayerVideoInfo first = queue.getFirst();
-
-            RequestVideoInfo requestVideoInfo = new RequestVideoInfo(first.getVideoId());
             VideoInfo videoInfo;
             try {
                 videoInfo = downloader.getVideoInfo(requestVideoInfo).data(30, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
-                throw new RuntimeException(e);
+                properInfo.setSuccess(false);
+                properInfo.setFinished(true);
+                return;
             }
             if (!videoInfo.details().isDownloadable()) {
-                queue.removeFirst();
-                thread = null;
-                update(override);
+                properInfo.setSuccess(false);
+                properInfo.setFinished(true);
                 return;
             }
 
             VideoFormat videoFormat = videoInfo.bestVideoWithAudioFormat();
 
-            String fileName = first.getVideoId();
-            File shouldFile = new File(outputDirectory, fileName + "." + videoFormat.extension().value());
+            File shouldFile = new File(outputDirectory, playerInfo.getVideoId() + "." + videoFormat.extension().value());
 
             if (shouldFile.exists()) {
-                nextVideo = new ActualVideoInfo(shouldFile, first);
+                properInfo.setFile(shouldFile);
+                properInfo.setSuccess(true);
+                properInfo.setFinished(true);
             } else {
                 RequestVideoFileDownload request = new RequestVideoFileDownload(videoFormat)
                         .saveTo(outputDirectory)
-                        .renameTo(fileName);
+                        .renameTo(playerInfo.getVideoId());
 
                 File output;
                 try {
@@ -93,29 +79,57 @@ public class QueueHandler {
                     throw new RuntimeException(e);
                 }
 
-                nextVideo = new ActualVideoInfo(output, first);
+                properInfo.setFile(output);
+                properInfo.setFinished(true);
+                properInfo.setSuccess(true);
             }
 
-            networkHandler.getConnection().sendPacket(new ServerboundPlayerPlaylistUpdatePacket(
-                    new PlayerPlaylistInfo(queue)
-            ));
-
-            synchronized (PlayerHandler.LOCK) {
-                PlayerHandler.LOCK.notify();
-            }
-
-            thread = null;
         });
     }
 
-    public void next() {
-        if (queue.isEmpty()) {
+    public void onVideoPlay() {
+        prepareNextVideo();
+    }
+
+    public void knockQueue() {
+        synchronized (PlayerHandler.LOCK) {
+            PlayerHandler.LOCK.notify();
+        }
+
+        prepareNextVideo();
+    }
+
+    private void prepareNextVideo() {
+        ProperVideoInfo nextVideo = queue.getNextVideo();
+        if (nextVideo == null) {
             return;
         }
-        PlayerVideoInfo first = queue.removeFirst();
 
-        if (first.isDefaultPlaylistVideo()) {
-            queue.addLast(first);
+        downloadVideo(nextVideo).thenAccept(v -> knockQueue());
+    }
+
+    public void onVideoPrePlay() {
+        ServerConnection connection = networkHandler.getConnection();
+        if (connection != null && connection.getConnectionState() == ConnectionState.READY) {
+            connection.sendPacket(new ServerboundPlayerPlaylistUpdatePacket(
+                    new PlayerPlaylistInfo(queue.toPlayerVideoInfoList())
+            ));
+        }
+
+        if (queue.getNowPlaying() == null || queue.getNowPlaying().isFailed()) {
+            queue.next();
+        }
+
+        ProperVideoInfo nowPlaying = queue.getNowPlaying();
+        if (nowPlaying == null) return;
+
+        if (!nowPlaying.isTaskTaken()) {
+            downloadVideo(nowPlaying).thenAccept(v -> knockQueue());
         }
     }
+
+    public void onVideoEnd() {
+        queue.next();
+    }
+
 }

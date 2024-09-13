@@ -44,8 +44,10 @@ public class PlayerHandler {
 
         thread = Thread.startVirtualThread(() -> {
             while (!thread.isInterrupted()) {
-                ActualVideoInfo nextVideo = queueHandler.getNextVideo();
-                if (nextVideo == null) {
+                queueHandler.onVideoPrePlay();
+
+                ProperVideoInfo nowPlaying = queueHandler.getQueue().getNowPlaying();
+                if (nowPlaying == null || !nowPlaying.isSuccess()) {
                     synchronized (LOCK) {
                         try {
                             LOCK.wait();
@@ -53,24 +55,24 @@ public class PlayerHandler {
                             throw new RuntimeException(e);
                         }
                     }
+                    continue;
                 }
-                nextVideo = queueHandler.getNextVideo();
-                queueHandler.setNextVideo(null);
-                queueHandler.setNowPlaying(nextVideo);
-                readyFor(nextVideo.file());
+
+                queueHandler.onVideoPlay();
+                readyFor(nowPlaying.getFile());
                 play();
 
                 networkHandler.getConnection().sendPacket(new ServerboundPlayerInfoPacket(
-                        new PlayerInfo(nextVideo.info(), player.isPaused())
+                        new PlayerInfo(nowPlaying.getInfo(), player.isPaused())
                 ));
 
-                queueHandler.next();
-                queueHandler.update(false);
                 try {
                     player.awaitFinish();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+
+                queueHandler.onVideoEnd();
             }
         });
     }

@@ -4,21 +4,17 @@ import me.dynmie.jeorge.Inject;
 import me.dynmie.jeorge.Injector;
 import me.dynmie.mono.client.QClient;
 import me.dynmie.mono.client.network.connection.ServerConnection;
-import me.dynmie.mono.client.player.ActualVideoInfo;
 import me.dynmie.mono.client.player.PlayerHandler;
+import me.dynmie.mono.client.player.ProperVideoInfo;
 import me.dynmie.mono.client.player.QueueHandler;
 import me.dynmie.mono.client.player.VideoPlayer;
 import me.dynmie.mono.shared.packet.ready.ClientboundReadyPacketHandler;
 import me.dynmie.mono.shared.packet.ready.client.*;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerInfoPacket;
-import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerPlaylistUpdatePacket;
 import me.dynmie.mono.shared.player.PlayerInfo;
-import me.dynmie.mono.shared.player.PlayerPlaylistInfo;
 import me.dynmie.mono.shared.player.PlayerVideoInfo;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author dynmie
@@ -48,14 +44,14 @@ public class DefaultClientboundReadyPacketHandler implements ClientboundReadyPac
     public void onPlayerPlay(ClientboundPlayerPlayPacket packet) {
         VideoPlayer player = playerHandler.getPlayer();
         if (player == null || !player.isRunning()) {
-            queueHandler.update(true);
+            queueHandler.knockQueue();
             return;
         }
         player.play();
-        ActualVideoInfo nowPlaying = queueHandler.getNowPlaying();
+        ProperVideoInfo nowPlaying = queueHandler.getQueue().getNowPlaying();
         if (nowPlaying == null) return;
         connection.sendPacket(new ServerboundPlayerInfoPacket(
-                new PlayerInfo(nowPlaying.info(), player.isPaused())
+                new PlayerInfo(nowPlaying.getInfo(), player.isPaused())
         ));
     }
 
@@ -66,10 +62,10 @@ public class DefaultClientboundReadyPacketHandler implements ClientboundReadyPac
             return;
         }
         player.pause();
-        ActualVideoInfo nowPlaying = queueHandler.getNowPlaying();
+        ProperVideoInfo nowPlaying = queueHandler.getQueue().getNowPlaying();
         if (nowPlaying == null) return;
         connection.sendPacket(new ServerboundPlayerInfoPacket(
-                new PlayerInfo(nowPlaying.info(), player.isPaused())
+                new PlayerInfo(nowPlaying.getInfo(), player.isPaused())
         ));
     }
 
@@ -84,36 +80,11 @@ public class DefaultClientboundReadyPacketHandler implements ClientboundReadyPac
 
     @Override
     public void onPlaylistUpdate(ClientboundPlayerPlaylistUpdatePacket packet) {
-        List<PlayerVideoInfo> prevQueue = queueHandler.getQueue();
-        PlayerVideoInfo prevFirst = null;
-        if (!prevQueue.isEmpty()) {
-            prevFirst = prevQueue.getFirst();
-        }
-
         List<PlayerVideoInfo> newQueue = packet.getPlaylistInfo().getVideos();
-        PlayerVideoInfo newFirst = null;
-        if (!newQueue.isEmpty()) {
-            newFirst = newQueue.getFirst();
-        }
 
-        queueHandler.setQueue(new ArrayList<>(packet.getPlaylistInfo().getVideos()));
+        queueHandler.getQueue().updateQueue(newQueue);
 
-        if (prevFirst != newFirst) {
-            Thread.startVirtualThread(() -> {
-                Optional.ofNullable(queueHandler.getThread()).ifPresent(t -> {
-                    try {
-                        t.join();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-                queueHandler.update(true);
-            });
-        }
-
-        connection.sendPacket(new ServerboundPlayerPlaylistUpdatePacket(
-                new PlayerPlaylistInfo(queueHandler.getQueue())
-        ));
+        queueHandler.knockQueue();
     }
 
     @Override
