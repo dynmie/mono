@@ -88,7 +88,6 @@ public class QClient {
         ));
 
         networkHandler.start();
-        queueHandler.initialize();
         playerHandler.initialize();
     }
 
