@@ -3,18 +3,18 @@ package me.dynmie.mono.server;
 import lombok.Getter;
 import me.dynmie.jeorge.Injector;
 import me.dynmie.jeorge.Jeorge;
-import me.dynmie.mono.server.client.ClientHandler;
-import me.dynmie.mono.server.client.session.SessionHandler;
+import me.dynmie.mono.server.client.ClientService;
+import me.dynmie.mono.server.client.session.SessionService;
 import me.dynmie.mono.server.command.handler.CommandHandler;
-import me.dynmie.mono.server.command.server.CommandRegistrationHandler;
+import me.dynmie.mono.server.command.server.CommandInitializer;
 import me.dynmie.mono.server.command.server.ServerCommandHandlerConfiguration;
-import me.dynmie.mono.server.console.ServerConsoleHandler;
+import me.dynmie.mono.server.console.ConsoleHandler;
 import me.dynmie.mono.server.data.ServerConfig;
-import me.dynmie.mono.server.data.ServerConfigHandler;
+import me.dynmie.mono.server.data.ServerConfigProvider;
 import me.dynmie.mono.server.jeorge.ServerBinder;
-import me.dynmie.mono.server.network.connection.ConnectionHandler;
+import me.dynmie.mono.server.network.connection.ConnectionService;
 import me.dynmie.mono.server.network.netty.NetworkHandler;
-import me.dynmie.mono.server.player.VideoHandler;
+import me.dynmie.mono.server.player.VideoService;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -46,7 +45,7 @@ public class Server {
     {
         // Logger setup
         logger.setUseParentHandlers(false);
-        ConsoleHandler handler = new ConsoleHandler();
+        java.util.logging.ConsoleHandler handler = new java.util.logging.ConsoleHandler();
         handler.setFormatter(new SimpleFormatter() {
             @Override
             public synchronized String format(LogRecord record) {
@@ -75,45 +74,44 @@ public class Server {
     public void start() {
         logger.info("Starting server...");
 
-        ServerConfigHandler configHandler = new ServerConfigHandler(workingFolderPath.resolve("config.json"));
-        configHandler.initialize();
-        ServerConfig config = configHandler.retrieveConfig();
+        ServerConfigProvider configHandler = new ServerConfigProvider(workingFolderPath.resolve("config.json"));
+        ServerConfig config = configHandler.get();
 
-        SessionHandler sessionHandler = new SessionHandler();
-        ConnectionHandler connectionHandler = new ConnectionHandler(this);
-        ClientHandler clientHandler = new ClientHandler();
+        SessionService sessionService = new SessionService();
+        ConnectionService connectionService = new ConnectionService(this);
+        ClientService clientService = new ClientService();
 
-        networkHandler = new NetworkHandler(logger, config.getNetworkInformation(), connectionHandler, sessionHandler, clientHandler);
+        networkHandler = new NetworkHandler(logger, config.getNetworkInformation(), connectionService, sessionService, clientService);
 
-        VideoHandler videoHandler = new VideoHandler(config.getPlayerConfiguration(), logger);
-        videoHandler.initialize();
+        VideoService videoService = new VideoService(config.getPlayerConfiguration(), logger);
+        videoService.initialize();
 
         ServerCommandHandlerConfiguration commandHandlerConfig = new ServerCommandHandlerConfiguration(
-                clientHandler
+                clientService
         );
         CommandHandler commandHandler = new CommandHandler(commandHandlerConfig, logger);
 
         injector = Jeorge.createInjector(new ServerBinder(
                 this,
                 logger,
-                sessionHandler,
-                connectionHandler,
-                clientHandler,
+                sessionService,
+                connectionService,
+                clientService,
                 networkHandler,
-                videoHandler,
+                videoService,
                 commandHandler,
                 config
         ));
 
-        CommandRegistrationHandler commandRegistrationHandler = new CommandRegistrationHandler(injector, commandHandler);
-        commandRegistrationHandler.initialize();
+        CommandInitializer commandInitializer = new CommandInitializer(injector, commandHandler);
+        commandInitializer.initialize();
 
-        ServerConsoleHandler serverConsoleHandler = new ServerConsoleHandler(this, lineReader, commandHandler);
+        ConsoleHandler consoleHandler = new ConsoleHandler(this, lineReader, commandHandler);
 
         networkHandler.start();
 
         logger.info("Welcome to Mono!");
-        serverConsoleHandler.initialize();
+        consoleHandler.initialize();
     }
 
     /**

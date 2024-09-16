@@ -1,4 +1,4 @@
-package me.dynmie.mono.client.player;
+package me.dynmie.mono.client.queue;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

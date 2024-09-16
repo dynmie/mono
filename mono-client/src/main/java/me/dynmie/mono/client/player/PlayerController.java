@@ -2,6 +2,8 @@ package me.dynmie.mono.client.player;
 
 import lombok.Getter;
 import me.dynmie.mono.client.network.NetworkHandler;
+import me.dynmie.mono.client.queue.ProperVideoInfo;
+import me.dynmie.mono.client.queue.QueueService;
 import me.dynmie.mono.client.utils.ConsoleUtils;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerInfoPacket;
 import me.dynmie.mono.shared.player.PlayerConfig;
@@ -13,11 +15,11 @@ import java.io.File;
 /**
  * @author dynmie
  */
-public class PlayerHandler {
+public class PlayerController {
 
     private @Getter VideoPlayer player;
     private final Terminal terminal;
-    private final QueueHandler queueHandler;
+    private final QueueService queueService;
     private final NetworkHandler networkHandler;
 
     private Thread thread;
@@ -25,28 +27,24 @@ public class PlayerHandler {
 
     private volatile PlayerConfig config = new PlayerConfig(true, false, true);
 
-    public PlayerHandler(Terminal terminal, QueueHandler queueHandler, NetworkHandler networkHandler) {
+    public PlayerController(Terminal terminal, QueueService queueService, NetworkHandler networkHandler) {
         this.terminal = terminal;
-        this.queueHandler = queueHandler;
+        this.queueService = queueService;
         this.networkHandler = networkHandler;
     }
 
     public void initialize() {
-        Terminal.SignalHandler signalHandler = signal -> {
-            if (signal == Terminal.Signal.WINCH) {
-                VideoPlayer plr = getPlayer();
-                if (plr == null) return;
-                plr.setResolution(terminal.getWidth(), terminal.getHeight());
-            }
-        };
-
-        terminal.handle(Terminal.Signal.WINCH, signalHandler);
+        terminal.handle(Terminal.Signal.WINCH, signal -> {
+            VideoPlayer plr = getPlayer();
+            if (plr == null) return;
+            plr.setResolution(terminal.getWidth(), terminal.getHeight());
+        });
 
         thread = Thread.startVirtualThread(() -> {
             while (!thread.isInterrupted()) {
-                queueHandler.onVideoPrePlay();
+                queueService.onVideoPrePlay();
 
-                ProperVideoInfo nowPlaying = queueHandler.getQueue().getNowPlaying();
+                ProperVideoInfo nowPlaying = queueService.getQueue().getNowPlaying();
                 if (nowPlaying == null || !nowPlaying.isSuccess()) {
                     synchronized (LOCK) {
                         try {
@@ -58,7 +56,7 @@ public class PlayerHandler {
                     continue;
                 }
 
-                queueHandler.onVideoPlay();
+                queueService.onVideoPlay();
                 readyFor(nowPlaying.getFile());
                 play();
 
@@ -72,12 +70,12 @@ public class PlayerHandler {
                     throw new RuntimeException(e);
                 }
 
-                queueHandler.onVideoEnd();
+                queueService.onVideoEnd();
             }
         });
     }
 
-    public void readyFor(File file) {
+    private void readyFor(File file) {
         stop();
         player = new VideoPlayer(System.out, file, terminal.getWidth(), terminal.getHeight(), new Asciifier(
                 config.isColor(),

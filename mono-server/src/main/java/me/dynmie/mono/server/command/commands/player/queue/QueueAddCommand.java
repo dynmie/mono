@@ -5,7 +5,7 @@ import me.dynmie.mono.server.client.RemoteClient;
 import me.dynmie.mono.server.command.handler.BaseCommand;
 import me.dynmie.mono.server.command.handler.CommandContext;
 import me.dynmie.mono.server.command.handler.CommandResult;
-import me.dynmie.mono.server.player.VideoHandler;
+import me.dynmie.mono.server.player.VideoService;
 import me.dynmie.mono.shared.player.PlayerVideoInfo;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class QueueAddCommand extends BaseCommand {
     @Inject
-    private VideoHandler videoHandler;
+    private VideoService videoService;
 
     public QueueAddCommand() {
         super(List.of("add"));
@@ -39,7 +39,7 @@ public class QueueAddCommand extends BaseCommand {
             def = context.getAt(2, Boolean.class);
         }
 
-        PlayerVideoInfo videoInfo = videoHandler.getVideoInfo(context.getArgAt(1), def);
+        PlayerVideoInfo videoInfo = videoService.getVideoInfo(context.getArgAt(1), def);
         if (videoInfo == null) {
             context.sendMessage("That video doesn't exist. Are you using the id instead of the link?");
             return CommandResult.OK;

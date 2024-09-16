@@ -5,10 +5,10 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import me.dynmie.mono.server.client.ClientHandler;
-import me.dynmie.mono.server.client.session.SessionHandler;
+import me.dynmie.mono.server.client.ClientService;
+import me.dynmie.mono.server.client.session.SessionService;
 import me.dynmie.mono.server.data.ServerConfig;
-import me.dynmie.mono.server.network.connection.ConnectionHandler;
+import me.dynmie.mono.server.network.connection.ConnectionService;
 
 import java.net.InetAddress;
 import java.util.logging.Logger;
@@ -20,19 +20,19 @@ public class NetworkHandler {
 
     private final Logger logger;
     private final ServerConfig.NetworkInformation networkInformation;
-    private final ConnectionHandler connectionHandler;
-    private final SessionHandler sessionHandler;
-    private final ClientHandler clientHandler;
+    private final ConnectionService connectionService;
+    private final SessionService sessionService;
+    private final ClientService clientService;
 
     private Channel serverChannel;
 
 
-    public NetworkHandler(Logger logger, ServerConfig.NetworkInformation networkInformation, ConnectionHandler connectionHandler, SessionHandler sessionHandler, ClientHandler clientHandler) {
+    public NetworkHandler(Logger logger, ServerConfig.NetworkInformation networkInformation, ConnectionService connectionService, SessionService sessionService, ClientService clientService) {
         this.logger = logger;
         this.networkInformation = networkInformation;
-        this.connectionHandler = connectionHandler;
-        this.sessionHandler = sessionHandler;
-        this.clientHandler = clientHandler;
+        this.connectionService = connectionService;
+        this.sessionService = sessionService;
+        this.clientService = clientService;
     }
 
     public void start() {
@@ -48,7 +48,7 @@ public class NetworkHandler {
                     protected void initChannel(SocketChannel channel) {
                         channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(2097152));
                         ChannelPipeline pipeline = channel.pipeline();
-                        pipeline.addLast(new PacketDecoder(connectionHandler, sessionHandler, clientHandler, logger));
+                        pipeline.addLast(new PacketDecoder(connectionService, sessionService, clientService, logger));
                         pipeline.addLast(new SerializableEncoder());
                     }
                 });

@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  * @author dynmie
  */
 @RequiredArgsConstructor
-public class VideoHandler {
+public class VideoService {
 
     private final ServerConfig.PlayerConfiguration configuration;
     private final Logger logger;

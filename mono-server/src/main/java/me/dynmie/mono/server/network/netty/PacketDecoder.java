@@ -5,11 +5,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.AllArgsConstructor;
-import me.dynmie.mono.server.client.ClientHandler;
+import me.dynmie.mono.server.client.ClientService;
 import me.dynmie.mono.server.client.RemoteClient;
-import me.dynmie.mono.server.client.session.SessionHandler;
+import me.dynmie.mono.server.client.session.SessionService;
 import me.dynmie.mono.server.network.connection.ClientConnection;
-import me.dynmie.mono.server.network.connection.ConnectionHandler;
+import me.dynmie.mono.server.network.connection.ConnectionService;
 import me.dynmie.mono.shared.packet.*;
 import me.dynmie.mono.shared.session.ClientSession;
 import me.dynmie.mono.shared.util.SerializationUtils;
@@ -23,9 +23,9 @@ import java.util.logging.Logger;
 @AllArgsConstructor
 public class PacketDecoder extends ChannelInboundHandlerAdapter {
 
-    private final ConnectionHandler connectionHandler;
-    private final SessionHandler sessionHandler;
-    private final ClientHandler clientHandler;
+    private final ConnectionService connectionService;
+    private final SessionService sessionService;
+    private final ClientService clientService;
     private final Logger logger;
 
     @Override
@@ -55,10 +55,10 @@ public class PacketDecoder extends ChannelInboundHandlerAdapter {
         @SuppressWarnings("unchecked") // checked by ConnectionState
         Packet<PacketHandler> packet = (Packet<PacketHandler>) Packets.fromRaw(connectionState, PacketDirection.SERVERBOUND, rawPacket);
 
-        ClientConnection clientConnection = connectionHandler.getConnectionByChannel(channel);
+        ClientConnection clientConnection = connectionService.getConnectionByChannel(channel);
         if (clientConnection == null) {
-            clientConnection = connectionHandler.createConnection(channel);
-            connectionHandler.addConnection(clientConnection);
+            clientConnection = connectionService.createConnection(channel);
+            connectionService.addConnection(clientConnection);
         }
 
         PacketHandler handler = clientConnection.getPacketHandler();
@@ -70,22 +70,22 @@ public class PacketDecoder extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) {
         Channel channel = ctx.channel();
 
-        ClientConnection connection = connectionHandler.getConnectionByChannel(channel);
+        ClientConnection connection = connectionService.getConnectionByChannel(channel);
         if (connection == null) {
-            connectionHandler.removeConnectionByChannel(channel);
+            connectionService.removeConnectionByChannel(channel);
             return;
         }
 
         // SESSION INFO
-        ClientSession session = sessionHandler.getSessionByChannel(channel);
+        ClientSession session = sessionService.getSessionByChannel(channel);
         if (session == null) {
-            connectionHandler.removeConnectionByChannel(channel);
+            connectionService.removeConnectionByChannel(channel);
             logger.info("Unknown client from " + channel.remoteAddress() + " disconnected from the server.");
             return;
         }
 
-        RemoteClient client = clientHandler.getClient(session.getUniqueId());
-        clientHandler.removeClient(client);
+        RemoteClient client = clientService.getClient(session.getUniqueId());
+        clientService.removeClient(client);
 
         logger.info("Client %s[%s](%s) disconnected from the server.".formatted(
                 session.getName(),
@@ -93,7 +93,7 @@ public class PacketDecoder extends ChannelInboundHandlerAdapter {
                 channel.remoteAddress()
         ));
 
-        connectionHandler.removeConnectionByChannel(ctx.channel());
+        connectionService.removeConnectionByChannel(ctx.channel());
     }
 
     @Override

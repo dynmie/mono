@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author dynmie
  */
-public class ClientHandler {
+public class ClientService {
     private final Map<UUID, RemoteClient> clients = new ConcurrentHashMap<>();
 
     public RemoteClient getClient(UUID uniqueId) {

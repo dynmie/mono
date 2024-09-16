@@ -3,13 +3,13 @@ package me.dynmie.mono.server.jeorge;
 import lombok.AllArgsConstructor;
 import me.dynmie.jeorge.Binder;
 import me.dynmie.mono.server.Server;
-import me.dynmie.mono.server.client.ClientHandler;
-import me.dynmie.mono.server.client.session.SessionHandler;
+import me.dynmie.mono.server.client.ClientService;
+import me.dynmie.mono.server.client.session.SessionService;
 import me.dynmie.mono.server.command.handler.CommandHandler;
 import me.dynmie.mono.server.data.ServerConfig;
-import me.dynmie.mono.server.network.connection.ConnectionHandler;
+import me.dynmie.mono.server.network.connection.ConnectionService;
 import me.dynmie.mono.server.network.netty.NetworkHandler;
-import me.dynmie.mono.server.player.VideoHandler;
+import me.dynmie.mono.server.player.VideoService;
 
 import java.util.logging.Logger;
 
@@ -21,11 +21,11 @@ public class ServerBinder extends Binder {
 
     private final Server server;
     private final Logger logger;
-    private final SessionHandler sessionHandler;
-    private final ConnectionHandler connectionHandler;
-    private final ClientHandler clientHandler;
+    private final SessionService sessionService;
+    private final ConnectionService connectionService;
+    private final ClientService clientService;
     private final NetworkHandler networkHandler;
-    private final VideoHandler videoHandler;
+    private final VideoService videoService;
     private final CommandHandler commandHandler;
     private final ServerConfig config;
 
@@ -33,11 +33,11 @@ public class ServerBinder extends Binder {
     public void configure() {
         bind(Server.class, server);
         bind(Logger.class, logger);
-        bind(SessionHandler.class, sessionHandler);
-        bind(ConnectionHandler.class, connectionHandler);
-        bind(ClientHandler.class, clientHandler);
+        bind(SessionService.class, sessionService);
+        bind(ConnectionService.class, connectionService);
+        bind(ClientService.class, clientService);
         bind(NetworkHandler.class, networkHandler);
-        bind(VideoHandler.class, videoHandler);
+        bind(VideoService.class, videoService);
         bind(CommandHandler.class, commandHandler);
         bind(ServerConfig.class, config);
     }

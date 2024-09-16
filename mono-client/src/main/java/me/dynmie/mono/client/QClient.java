@@ -4,11 +4,11 @@ import lombok.Getter;
 import me.dynmie.jeorge.Injector;
 import me.dynmie.jeorge.Jeorge;
 import me.dynmie.mono.client.data.ClientConfig;
-import me.dynmie.mono.client.data.ClientConfigHandler;
+import me.dynmie.mono.client.data.ClientConfigProvider;
 import me.dynmie.mono.client.jeorge.ClientBinder;
 import me.dynmie.mono.client.network.NetworkHandler;
-import me.dynmie.mono.client.player.PlayerHandler;
-import me.dynmie.mono.client.player.QueueHandler;
+import me.dynmie.mono.client.player.PlayerController;
+import me.dynmie.mono.client.queue.QueueService;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.InfoCmp;
@@ -68,27 +68,26 @@ public class QClient {
      * Starts the client.
      */
     public void start() {
-        ClientConfigHandler configHandler = new ClientConfigHandler(workingFolderPath.resolve("config.json"));
-        configHandler.initialize();
-        ClientConfig config = configHandler.retrieveConfig();
+        ClientConfigProvider configHandler = new ClientConfigProvider(workingFolderPath.resolve("config.json"));
+        ClientConfig config = configHandler.get();
 
         networkHandler = new NetworkHandler(this, logger, config.getNetworkInformation());
 
-        QueueHandler queueHandler = new QueueHandler(this, networkHandler);
+        QueueService queueService = new QueueService(this, networkHandler);
 
-        PlayerHandler playerHandler = new PlayerHandler(terminal, queueHandler, networkHandler);
+        PlayerController playerController = new PlayerController(terminal, queueService, networkHandler);
 
         injector = Jeorge.createInjector(new ClientBinder(
                 this,
                 networkHandler,
                 configHandler,
-                playerHandler,
-                queueHandler,
+                playerController,
+                queueService,
                 config
         ));
 
         networkHandler.start();
-        playerHandler.initialize();
+        playerController.initialize();
     }
 
     /**

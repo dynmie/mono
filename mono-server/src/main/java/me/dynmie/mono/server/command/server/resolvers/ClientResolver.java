@@ -1,7 +1,7 @@
 package me.dynmie.mono.server.command.server.resolvers;
 
 import lombok.AllArgsConstructor;
-import me.dynmie.mono.server.client.ClientHandler;
+import me.dynmie.mono.server.client.ClientService;
 import me.dynmie.mono.server.client.RemoteClient;
 import me.dynmie.mono.server.command.handler.CommandContext;
 import me.dynmie.mono.server.command.handler.CommandResult;
@@ -15,13 +15,13 @@ import java.util.UUID;
  */
 @AllArgsConstructor
 public class ClientResolver implements ArgumentResolver<RemoteClient> {
-    private final ClientHandler clientHandler;
+    private final ClientService clientService;
 
     @Override
     public RemoteClient resolve(CommandContext context, String arg) {
         try {
             UUID uuid = UUID.fromString(arg);
-            RemoteClient client = clientHandler.getClient(uuid);
+            RemoteClient client = clientService.getClient(uuid);
             if (client != null) {
                 return client;
             }
@@ -29,7 +29,7 @@ public class ClientResolver implements ArgumentResolver<RemoteClient> {
 
         }
 
-        RemoteClient client = clientHandler.getClient(arg);
+        RemoteClient client = clientService.getClient(arg);
         if (client == null) {
             throw new UnresolvedException();
         }

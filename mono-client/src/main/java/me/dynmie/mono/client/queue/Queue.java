@@ -1,4 +1,4 @@
-package me.dynmie.mono.client.player;
+package me.dynmie.mono.client.queue;
 
 import lombok.Getter;
 import me.dynmie.mono.shared.player.PlayerVideoInfo;

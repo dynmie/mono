@@ -1,12 +1,12 @@
 package me.dynmie.mono.server.network.handler;
 
 import me.dynmie.jeorge.Injector;
-import me.dynmie.mono.server.client.ClientHandler;
+import me.dynmie.mono.server.client.ClientService;
 import me.dynmie.mono.server.client.RemoteClient;
-import me.dynmie.mono.server.client.session.SessionHandler;
+import me.dynmie.mono.server.client.session.SessionService;
 import me.dynmie.mono.server.data.ServerConfig;
 import me.dynmie.mono.server.network.connection.ClientConnection;
-import me.dynmie.mono.server.player.VideoHandler;
+import me.dynmie.mono.server.player.VideoService;
 import me.dynmie.mono.shared.packet.ConnectionState;
 import me.dynmie.mono.shared.packet.login.ServerboundLoginPacketHandler;
 import me.dynmie.mono.shared.packet.login.client.ClientboundLoginFailedPacket;
@@ -52,27 +52,27 @@ public class DefaultServerboundLoginPacketHandler implements ServerboundLoginPac
             return;
         }
 
-        SessionHandler sessionHandler = injector.getDependency(SessionHandler.class);
-        ClientHandler clientHandler = injector.getDependency(ClientHandler.class);
-        VideoHandler videoHandler = injector.getDependency(VideoHandler.class);
+        SessionService sessionService = injector.getDependency(SessionService.class);
+        ClientService clientService = injector.getDependency(ClientService.class);
+        VideoService videoService = injector.getDependency(VideoService.class);
 
         String clientName = "default";
         UUID uniqueId = UUID.randomUUID();
 
-        if (clientHandler.getClient(clientName) != null) {
+        if (clientService.getClient(clientName) != null) {
             String string = uniqueId.toString();
             clientName = string.substring(string.length() - 4);
 
             // name collisions lmao
-            if (clientHandler.getClient(clientName) != null) {
+            if (clientService.getClient(clientName) != null) {
                 clientName = string;
             }
         }
 
         ClientSession session = new ClientSession(clientName, uniqueId);
-        sessionHandler.addSession(connection.getChannel(), session);
+        sessionService.addSession(connection.getChannel(), session);
 
-        RemoteClient found = clientHandler.getClient(uniqueId);
+        RemoteClient found = clientService.getClient(uniqueId);
         if (found != null) {
             connection.sendPacket(new ClientboundLoginFailedPacket());
             connection.closeConnection();
@@ -84,9 +84,9 @@ public class DefaultServerboundLoginPacketHandler implements ServerboundLoginPac
         RemoteClient client = new RemoteClient(
                 session,
                 connection,
-                new ArrayList<>(videoHandler.generateDefaultPlaylistInfo().getVideos())
+                new ArrayList<>(videoService.generateDefaultPlaylistInfo().getVideos())
         );
-        clientHandler.addClient(client);
+        clientService.addClient(client);
 
         // wierd fix, apparently netty doesn't run future listeners for some reason
         // can't seem to find a solution so i did this instead

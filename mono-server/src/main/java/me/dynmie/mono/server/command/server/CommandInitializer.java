@@ -23,7 +23,7 @@ import java.util.List;
  * @author dynmie
  */
 @AllArgsConstructor
-public class CommandRegistrationHandler {
+public class CommandInitializer {
     private static final List<Class<? extends BaseCommand>> commandTypes = List.of(
             ServerHelpCommand.class,
             PauseCommand.class,

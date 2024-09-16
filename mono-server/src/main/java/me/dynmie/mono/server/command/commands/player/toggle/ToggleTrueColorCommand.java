@@ -1,7 +1,7 @@
 package me.dynmie.mono.server.command.commands.player.toggle;
 
 import me.dynmie.jeorge.Inject;
-import me.dynmie.mono.server.client.ClientHandler;
+import me.dynmie.mono.server.client.ClientService;
 import me.dynmie.mono.server.client.RemoteClient;
 import me.dynmie.mono.server.command.handler.BaseCommand;
 import me.dynmie.mono.server.command.handler.CommandContext;
@@ -16,7 +16,7 @@ import java.util.List;
 public class ToggleTrueColorCommand extends BaseCommand {
 
     @Inject
-    private ClientHandler clientHandler;
+    private ClientService clientService;
 
     public ToggleTrueColorCommand() {
         super(List.of("togglefullpixel", "tfp"));
@@ -36,7 +36,7 @@ public class ToggleTrueColorCommand extends BaseCommand {
         if (context.size() > 0) {
             client = context.getAt(0, RemoteClient.class);
         } else {
-            client = clientHandler.getClient("default");
+            client = clientService.getClient("default");
         }
         if (client == null) {
             return CommandResult.INCORRECT_USAGE;

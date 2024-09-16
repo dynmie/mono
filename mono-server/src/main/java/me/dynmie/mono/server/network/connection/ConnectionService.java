@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author dynmie
  */
 @RequiredArgsConstructor
-public class ConnectionHandler {
+public class ConnectionService {
 
     private final Server client;
 

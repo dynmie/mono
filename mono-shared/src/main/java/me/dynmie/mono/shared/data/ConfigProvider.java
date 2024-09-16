@@ -16,7 +16,7 @@ import java.nio.file.Path;
  * @author dynmie
  */
 @AllArgsConstructor
-public class ConfigHandler<T> {
+public class ConfigProvider<T> {
 
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
@@ -29,7 +29,7 @@ public class ConfigHandler<T> {
      * Initializes the configuration data if the file does not exist.
      * If the file does not exist, a new configuration object of type T will be created and saved.
      */
-    public void initialize() {
+    private void initialize() {
         if (Files.exists(path)) return;
 
         try {
@@ -47,7 +47,9 @@ public class ConfigHandler<T> {
      *
      * @return the configuration object
      */
-    public T retrieveConfig() {
+    public T get() {
+        initialize();
+
         JsonData jsonData = new JsonData(path);
         jsonData.load();
         return gson.fromJson(jsonData.getJsonObject(), getType());
@@ -69,7 +71,7 @@ public class ConfigHandler<T> {
      *
      * @param config the configuration object to be saved
      */
-    public void saveConfig(T config) {
+    private void saveConfig(T config) {
         new JsonData(path, gson.toJsonTree(config).getAsJsonObject()).save();
     }
 

@@ -11,7 +11,7 @@ import org.jline.reader.UserInterruptException;
  * @author dynmie
  */
 @AllArgsConstructor
-public class ServerConsoleHandler {
+public class ConsoleHandler {
     private final Server server;
     private final LineReader lineReader;
     private final CommandHandler commandHandler;

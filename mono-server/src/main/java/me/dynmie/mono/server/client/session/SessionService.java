@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author dynmie
  */
-public class SessionHandler {
+public class SessionService {
     private final Map<Channel, ClientSession> sessions = new ConcurrentHashMap<>();
 
     public void removeSessionByChannel(Channel channel) {

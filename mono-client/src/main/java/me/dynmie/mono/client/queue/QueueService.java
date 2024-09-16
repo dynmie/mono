@@ -1,4 +1,4 @@
-package me.dynmie.mono.client.player;
+package me.dynmie.mono.client.queue;
 
 import com.github.kiulian.downloader.YoutubeDownloader;
 import com.github.kiulian.downloader.downloader.request.RequestVideoFileDownload;
@@ -9,6 +9,7 @@ import lombok.Getter;
 import me.dynmie.mono.client.QClient;
 import me.dynmie.mono.client.network.NetworkHandler;
 import me.dynmie.mono.client.network.connection.ServerConnection;
+import me.dynmie.mono.client.player.PlayerController;
 import me.dynmie.mono.shared.packet.ConnectionState;
 import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerPlaylistUpdatePacket;
 import me.dynmie.mono.shared.player.PlayerPlaylistInfo;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author dynmie
  */
-public class QueueHandler {
+public class QueueService {
     private final YoutubeDownloader downloader = new YoutubeDownloader();
 
     private final NetworkHandler networkHandler;
@@ -30,7 +31,7 @@ public class QueueHandler {
     private final @Getter Queue queue = new Queue();
     private final @Getter File outputDirectory;
 
-    public QueueHandler(QClient client, NetworkHandler networkHandler) {
+    public QueueService(QClient client, NetworkHandler networkHandler) {
         this.networkHandler = networkHandler;
 
         this.outputDirectory = new File(client.getWorkingFolderPath().toFile(), "videos");
@@ -92,8 +93,8 @@ public class QueueHandler {
     }
 
     public void knockQueue() {
-        synchronized (PlayerHandler.LOCK) {
-            PlayerHandler.LOCK.notify();
+        synchronized (PlayerController.LOCK) {
+            PlayerController.LOCK.notify();
         }
 
         prepareNextVideo();
