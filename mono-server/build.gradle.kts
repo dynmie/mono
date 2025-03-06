@@ -23,7 +23,7 @@ dependencies {
     implementation("org.jline:jline-terminal-jni:3.25.1")
     implementation("org.jline:jline-reader:3.25.1")
     implementation(project(":mono-shared"))
-    implementation("com.github.sealedtx:java-youtube-downloader:3.2.3")
+    implementation("com.github.sealedtx:java-youtube-downloader:3.2.8")
 
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")

@@ -44,7 +44,7 @@ public class DefaultClientboundReadyPacketHandler implements ClientboundReadyPac
     public void onPlayerPlay(ClientboundPlayerPlayPacket packet) {
         VideoPlayer player = playerController.getPlayer();
         if (player == null || !player.isRunning()) {
-            queueService.knockQueue();
+            queueService.sendQueueUpdate();
             return;
         }
         player.play();
@@ -84,7 +84,7 @@ public class DefaultClientboundReadyPacketHandler implements ClientboundReadyPac
 
         queueService.getQueue().updateQueue(newQueue);
 
-        queueService.knockQueue();
+        queueService.sendQueueUpdate();
     }
 
     @Override

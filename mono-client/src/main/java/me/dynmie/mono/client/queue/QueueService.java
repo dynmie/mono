@@ -1,21 +1,17 @@
 package me.dynmie.mono.client.queue;
 
 import com.github.kiulian.downloader.YoutubeDownloader;
+import com.github.kiulian.downloader.downloader.client.ClientType;
+import com.github.kiulian.downloader.downloader.client.Clients;
 import com.github.kiulian.downloader.downloader.request.RequestVideoFileDownload;
 import com.github.kiulian.downloader.downloader.request.RequestVideoInfo;
 import com.github.kiulian.downloader.model.videos.VideoInfo;
 import com.github.kiulian.downloader.model.videos.formats.VideoFormat;
 import lombok.Getter;
-import me.dynmie.mono.client.QClient;
-import me.dynmie.mono.client.network.NetworkHandler;
-import me.dynmie.mono.client.network.connection.ServerConnection;
-import me.dynmie.mono.client.player.PlayerController;
-import me.dynmie.mono.shared.packet.ConnectionState;
-import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerPlaylistUpdatePacket;
-import me.dynmie.mono.shared.player.PlayerPlaylistInfo;
 import me.dynmie.mono.shared.player.PlayerVideoInfo;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -26,15 +22,17 @@ import java.util.concurrent.TimeoutException;
 public class QueueService {
     private final YoutubeDownloader downloader = new YoutubeDownloader();
 
-    private final NetworkHandler networkHandler;
+    public static final Object QUEUE_UPDATE_LOCK = new Object();
 
     private final @Getter Queue queue = new Queue();
-    private final @Getter File outputDirectory;
+    private final @Getter Path outputDirectoryPath;
 
-    public QueueService(QClient client, NetworkHandler networkHandler) {
-        this.networkHandler = networkHandler;
+    public QueueService(Path workingFolderPath) {
+        this.outputDirectoryPath = workingFolderPath.resolve("videos");
+    }
 
-        this.outputDirectory = new File(client.getWorkingFolderPath().toFile(), "videos");
+    static {
+        Clients.setHighestPriorityClientType(ClientType.WEB_PARENT_TOOLS);
     }
 
     public CompletableFuture<Void> downloadVideo(ProperVideoInfo properInfo) {
@@ -62,25 +60,28 @@ public class QueueService {
 
             VideoFormat videoFormat = videoInfo.bestVideoWithAudioFormat();
 
-            File shouldFile = new File(outputDirectory, playerInfo.getVideoId() + "." + videoFormat.extension().value());
+            Path shouldPath = outputDirectoryPath.resolve("%s.%s".formatted(
+                    playerInfo.getVideoId(),
+                    videoFormat.extension().value()
+            ));
 
-            if (shouldFile.exists()) {
-                properInfo.setFile(shouldFile);
+            if (Files.exists(shouldPath)) {
+                properInfo.setPath(shouldPath);
                 properInfo.setSuccess(true);
                 properInfo.setFinished(true);
             } else {
                 RequestVideoFileDownload request = new RequestVideoFileDownload(videoFormat)
-                        .saveTo(outputDirectory)
+                        .saveTo(outputDirectoryPath.toFile())
                         .renameTo(playerInfo.getVideoId());
 
-                File output;
+                Path output;
                 try {
-                    output = downloader.downloadVideoFile(request).data(2, TimeUnit.MINUTES);
+                    output = downloader.downloadVideoFile(request).data(2, TimeUnit.MINUTES).toPath();
                 } catch (TimeoutException e) {
                     throw new RuntimeException(e);
                 }
 
-                properInfo.setFile(output);
+                properInfo.setPath(output);
                 properInfo.setFinished(true);
                 properInfo.setSuccess(true);
             }
@@ -88,49 +89,21 @@ public class QueueService {
         });
     }
 
-    public void onVideoPlay() {
-        prepareNextVideo();
-    }
-
-    public void knockQueue() {
-        synchronized (PlayerController.LOCK) {
-            PlayerController.LOCK.notify();
+    public void sendQueueUpdate() {
+        synchronized (QUEUE_UPDATE_LOCK) {
+            QUEUE_UPDATE_LOCK.notify();
         }
 
         prepareNextVideo();
     }
 
-    private void prepareNextVideo() {
+    public void prepareNextVideo() {
         ProperVideoInfo nextVideo = queue.getNextVideo();
         if (nextVideo == null) {
             return;
         }
 
-        downloadVideo(nextVideo).thenAccept(v -> knockQueue());
-    }
-
-    public void onVideoPrePlay() {
-        ServerConnection connection = networkHandler.getConnection();
-        if (connection != null && connection.getConnectionState() == ConnectionState.READY) {
-            connection.sendPacket(new ServerboundPlayerPlaylistUpdatePacket(
-                    new PlayerPlaylistInfo(queue.toPlayerVideoInfoList())
-            ));
-        }
-
-        if (queue.getNowPlaying() == null || queue.getNowPlaying().isFailed()) {
-            queue.next();
-        }
-
-        ProperVideoInfo nowPlaying = queue.getNowPlaying();
-        if (nowPlaying == null) return;
-
-        if (!nowPlaying.isTaskTaken()) {
-            downloadVideo(nowPlaying).thenAccept(v -> knockQueue());
-        }
-    }
-
-    public void onVideoEnd() {
-        queue.next();
+        downloadVideo(nextVideo).thenAccept(v -> sendQueueUpdate());
     }
 
 }

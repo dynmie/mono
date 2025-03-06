@@ -8,6 +8,7 @@ import me.dynmie.mono.client.data.ClientConfigProvider;
 import me.dynmie.mono.client.jeorge.ClientBinder;
 import me.dynmie.mono.client.network.NetworkHandler;
 import me.dynmie.mono.client.player.PlayerController;
+import me.dynmie.mono.client.queue.QueueHandler;
 import me.dynmie.mono.client.queue.QueueService;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
@@ -32,6 +33,8 @@ public class QClient {
     private final @Getter Terminal terminal;
 
     private NetworkHandler networkHandler;
+    private PlayerController playerController;
+    private QueueHandler queueHandler;
 
     private @Getter Injector injector;
 
@@ -73,9 +76,12 @@ public class QClient {
 
         networkHandler = new NetworkHandler(this, logger, config.getNetworkInformation());
 
-        QueueService queueService = new QueueService(this, networkHandler);
+        playerController = new PlayerController(terminal);
+        playerController.initialize();
 
-        PlayerController playerController = new PlayerController(terminal, queueService, networkHandler);
+        QueueService queueService = new QueueService(getWorkingFolderPath());
+        queueHandler = new QueueHandler(networkHandler, queueService, playerController);
+        queueHandler.initialize();
 
         injector = Jeorge.createInjector(new ClientBinder(
                 this,
@@ -95,7 +101,11 @@ public class QClient {
      */
     public void shutdown() {
         logger.info("Shutting down...");
+
         networkHandler.shutdown();
+        playerController.shutdown();
+        queueHandler.shutdown();
+
         logger.info("Goodbye!");
         System.exit(0);
     }

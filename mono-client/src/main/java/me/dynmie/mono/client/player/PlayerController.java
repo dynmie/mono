@@ -1,16 +1,12 @@
 package me.dynmie.mono.client.player;
 
 import lombok.Getter;
-import me.dynmie.mono.client.network.NetworkHandler;
-import me.dynmie.mono.client.queue.ProperVideoInfo;
-import me.dynmie.mono.client.queue.QueueService;
+import lombok.SneakyThrows;
 import me.dynmie.mono.client.utils.ConsoleUtils;
-import me.dynmie.mono.shared.packet.ready.server.ServerboundPlayerInfoPacket;
 import me.dynmie.mono.shared.player.PlayerConfig;
-import me.dynmie.mono.shared.player.PlayerInfo;
 import org.jline.terminal.Terminal;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * @author dynmie
@@ -19,18 +15,13 @@ public class PlayerController {
 
     private @Getter VideoPlayer player;
     private final Terminal terminal;
-    private final QueueService queueService;
-    private final NetworkHandler networkHandler;
 
-    private Thread thread;
-    public static final Object LOCK = new Object();
+    private Thread controlThread;
 
     private volatile PlayerConfig config = new PlayerConfig(true, false, true);
 
-    public PlayerController(Terminal terminal, QueueService queueService, NetworkHandler networkHandler) {
+    public PlayerController(Terminal terminal) {
         this.terminal = terminal;
-        this.queueService = queueService;
-        this.networkHandler = networkHandler;
     }
 
     public void initialize() {
@@ -40,44 +31,67 @@ public class PlayerController {
             plr.setResolution(terminal.getWidth(), terminal.getHeight());
         });
 
-        thread = Thread.startVirtualThread(() -> {
-            while (!thread.isInterrupted()) {
-                queueService.onVideoPrePlay();
-
-                ProperVideoInfo nowPlaying = queueService.getQueue().getNowPlaying();
-                if (nowPlaying == null || !nowPlaying.isSuccess()) {
-                    synchronized (LOCK) {
-                        try {
-                            LOCK.wait();
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    continue;
-                }
-
-                queueService.onVideoPlay();
-                readyFor(nowPlaying.getFile());
-                play();
-
-                networkHandler.getConnection().sendPacket(new ServerboundPlayerInfoPacket(
-                        new PlayerInfo(nowPlaying.getInfo(), player.isPaused())
-                ));
-
-                try {
-                    player.awaitFinish();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-
-                queueService.onVideoEnd();
-            }
-        });
+        controlThread = Thread.startVirtualThread(this::startControls);
     }
 
-    private void readyFor(File file) {
+    public void shutdown() {
+        controlThread.interrupt();
         stop();
-        player = new VideoPlayer(System.out, file, terminal.getWidth(), terminal.getHeight(), new Asciifier(
+    }
+
+    @SneakyThrows
+    private void startControls() {
+        while (!Thread.interrupted()) {
+            int read = terminal.reader().read();
+            char character = (char) read;
+
+            if (player == null) {
+                continue;
+            }
+
+            switch (character) {
+                case 'c' -> {
+                    Asciifier old = player.getAsciifier();
+                    player.setAsciifier(new Asciifier(
+                            !old.isColor(),
+                            old.isFullPixel(),
+                            old.isTextDithering(),
+                            brightnessLevels(old.isColor())
+                    ));
+                }
+                case 'd' -> {
+                    Asciifier old = player.getAsciifier();
+                    player.setAsciifier(new Asciifier(
+                            old.isColor(),
+                            old.isFullPixel(),
+                            !old.isTextDithering(),
+                            brightnessLevels(old.isColor())
+                    ));
+                }
+                case 'f' -> {
+                    Asciifier old = player.getAsciifier();
+                    player.setAsciifier(new Asciifier(
+                            old.isColor(),
+                            !old.isFullPixel(),
+                            old.isTextDithering(),
+                            brightnessLevels(old.isColor())
+                    ));
+                }
+                case ' ' -> {
+                    if (player.isPaused()) {
+                        player.play();
+                    } else {
+                        player.pause();
+                    }
+                }
+                case 'n' -> player.stop();
+            }
+        }
+    }
+
+    public void readyFor(Path path) {
+        stop();
+        player = new VideoPlayer(System.out, path.toFile(), terminal.getWidth(), terminal.getHeight(), new Asciifier(
                 config.isColor(),
                 config.isFullPixel(),
                 config.isTextDithering(),

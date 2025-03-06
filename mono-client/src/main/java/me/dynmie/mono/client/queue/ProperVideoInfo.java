@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.dynmie.mono.shared.player.PlayerVideoInfo;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * @author dynmie
@@ -15,7 +15,7 @@ import java.io.File;
 @Setter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProperVideoInfo {
-    private File file;
+    private Path path;
     private boolean taskTaken;
     private boolean finished;
     private @Getter(AccessLevel.NONE) boolean success;
@@ -30,6 +30,6 @@ public class ProperVideoInfo {
     }
 
     public static ProperVideoInfo of(PlayerVideoInfo info) {
-        return new ProperVideoInfo(null, false,false, false, info);
+        return new ProperVideoInfo(null, false, false, false, info);
     }
 }

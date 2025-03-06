@@ -1,6 +1,7 @@
 package me.dynmie.mono.client.player;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import me.dynmie.mono.client.utils.ConsoleUtils;
 import me.dynmie.mono.client.utils.RGBUtils;
 
@@ -10,6 +11,7 @@ import java.util.stream.IntStream;
 /**
  * @author dynmie
  */
+@Getter
 @AllArgsConstructor
 public class Asciifier {
     private static final float DITHER_FACTOR = 0.0625f;

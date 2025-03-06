@@ -1,6 +1,8 @@
 package me.dynmie.mono.server.player;
 
 import com.github.kiulian.downloader.YoutubeDownloader;
+import com.github.kiulian.downloader.downloader.client.ClientType;
+import com.github.kiulian.downloader.downloader.client.Clients;
 import com.github.kiulian.downloader.downloader.request.RequestPlaylistInfo;
 import com.github.kiulian.downloader.downloader.request.RequestVideoInfo;
 import com.github.kiulian.downloader.downloader.response.Response;
@@ -30,6 +32,10 @@ public class VideoService {
     private final Logger logger;
     private final YoutubeDownloader downloader = new YoutubeDownloader();
     private List<PlayerVideoInfo> infos = new ArrayList<>();
+
+    static {
+        Clients.setHighestPriorityClientType(ClientType.WEB_PARENT_TOOLS);
+    }
 
     @SneakyThrows
     public void initialize() {
@@ -67,7 +73,10 @@ public class VideoService {
         RequestVideoInfo request = new RequestVideoInfo(id);
         Response<VideoInfo> response = downloader.getVideoInfo(request);
         VideoInfo video = response.data(30, TimeUnit.SECONDS);
-        if (video == null) return null;
+        if (video == null) {
+            response.error().printStackTrace();
+            return null;
+        }
 
         VideoDetails details = video.details();
         return new PlayerVideoInfo(
